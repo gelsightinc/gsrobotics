@@ -2,14 +2,11 @@
 SDK for GelSight robotic sensors
 
 
-###############################
+
 # install the python code
-###############################
 pip3 install .
 
-##############################
 # set paths
-##############################
 PYDIR=`pip3 show gelsight | grep -i location | cut -f2 -d" "`
 export LD_LIBRARY_PATH=$PYDIR/gelsightcore:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYDIR/gelsightcore:$PYDIR/gelsight:$PYTHONPATH
