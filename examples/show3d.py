@@ -1,4 +1,3 @@
-from matplotlib import pyplot as plt
 import sys, getopt
 import numpy as np
 import cv2
@@ -8,10 +7,6 @@ from os import listdir
 from os.path import isfile, join
 import open3d
 import copy
-# import utils
-# from utils.camera_calibration import warp_perspective
-import torch.nn as nn
-import torch.nn.functional as F
 from gelsight import gsdevice
 from gelsight import gs3drecon
 from gelsightcore import poisson_reconstruct
