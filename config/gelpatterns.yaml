@@ -1,0 +1,30 @@
+ #   N_, M_: the row and column of the marker array
+ #   x0_, y0_: the coordinate of upper-left marker (in original size)
+ #   dx_, dy_: the horizontal and vertical interval between adjacent markers (in original size)
+ #   fps_: the desired frame per second, the algorithm will find the optimal solution in 1/fps seconds
+
+gelPatterns:
+  smalldots:
+	N: 12
+	M: 7
+	fps: 30
+	x0: 44
+	y0: 29
+	dx: 36
+	dy: 38
+    bigdots:
+	N: 14
+    	M: 9
+    	fps: 60
+    	x0: 37
+    	y0: 14
+    	dx: 30
+    	dy: 30
+     r1smalldots:
+	N: 14
+    	M: 10
+    	fps: 60
+    	x0: 23
+    	y0: 15
+    	dx: 34
+    	dy: 34

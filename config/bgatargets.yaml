@@ -1,0 +1,39 @@
+ BgaTargetId.D02S03:
+	Name: "BGA D02 S03"
+	DiameterMm: 0.1984
+	SpacingMm: 0.3000
+	
+ BgaTargetId.D03S05:
+	Name: "BGA D03 S05"
+	DiameterMm: 0.3174
+	SpacingMm: 0.5000
+	
+ BgaTargetId.D05S10:
+	Name: "BGA D05 S10"
+	DiameterMm: 0.5000
+	SpacingMm: 1.0000
+	
+ BgaTargetId.D07S10:
+	Name: "BGA D07 S10"
+	DiameterMm: 0.6700
+	SpacingMm: 1.0000
+	
+ BgaTargetId.D10S20:
+	Name: "BGA D10 S20"
+	DiameterMm: 1.0000
+	SpacingMm: 2.0000
+	
+ BgaTargetId.D16S32:
+	Name: "BGA D16 S32"
+	DiameterMm: 1.5875
+	SpacingMm: 3.1750
+	
+ BgaTargetId.D24S48:
+	Name: "BGA D24 S48"
+	DiameterMm: 2.3813
+	SpacingMm: 4.7625
+	
+ BgaTargetId.D32S64:
+	Name: "BGA D32 S64"
+	DiameterMm: 3.1750
+	SpacingMm: 6.3500

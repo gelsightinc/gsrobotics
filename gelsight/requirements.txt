@@ -1,0 +1,6 @@
+numba==0.54.0
+numpy==1.17.4
+open3d==0.12.0
+opencv_python_headless==4.5.3.56
+scipy==1.6.3
+torch==1.8.1
