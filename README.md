@@ -73,7 +73,7 @@ Connect to the R1.5 again as shown in the steps above
 # Run the example to view the 3d data
 
     cd examples
-    python3 show3d.py
+    python3 show3d.py -d gsr15demo.local
 
 
 # R1 Notes
