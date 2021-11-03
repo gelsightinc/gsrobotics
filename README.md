@@ -1,46 +1,53 @@
 # tactile_sdk_local
 SDK for GelSight robotic sensors
 
+
+###############################
+# install the python code
+###############################
+pip3 install .
+
+##############################
+# set paths
+##############################
+PYDIR=`pip3 show gelsight | grep -i location | cut -f2 -d" "`
+export LD_LIBRARY_PATH=$PYDIR/gelsightcore:$LD_LIBRARY_PATH
+export PYTHONPATH=$PYDIR/gelsightcore:$PYDIR/gelsight:$PYTHONPATH
+
+#############################
+# connect to R1.5
+#############################
+sh connect.sh 
+enter the password gelsight
+
 ###########################
-# 3d reconstruction
+# check the stream
 ###########################
-
-gs_raspi_param.ini - set input/output directories
-
-gs_ximea.py - c enter, s for single images, q to quit
-
-find_bga_r1.py - finds circles puts it in circles directory
-
-nn_train_bga.py - trains the nn using the bga
-
-nn_rgb2nrm_test.py - view the results of the 3d reconstruction, realtime 3d
+open a browser and go to link
+gsr15demo.local:8080/?action=stream
 
 
-R1.5
+################################
+# shutdown and restart
+###############################
+ps -aux | grep mjpg_str
+kill -9 pid
+sudo shutdown now
 
-###########################
-#dot tracking
-###########################
-utils/live_ximea.py
+Connect to the R1.5 again as shown above
 
-R1   Nvidia and Haptix 14 devices out
+################################
+# run the example to show3d
+################################
+cd examples
+python3 show3d.py
 
 
-Connect to R1
+
+---------------------------------------------------------------
+#################################
+# Connect to R1 
+#################################
 
 > sudo tee /sys/module/usbcore/paramters/usbfs_memory_mb >/dev/null <<<0
-
-marker tracking
-
-use tracking.py
-
-Tune settings
-
-setting.py - number of rows/cols dots
-
-	   - x0, y0 : location of top left upper corner
-	   - dx, dy : distance between dots
-
-
-want to automatically find setting.py
 
