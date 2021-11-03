@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # mmpp = 0.0446  # for 640x480 img size R1
     # mmpp = 0.029 # for 1032x772 img size from R1
 
-    finger = gsdevice.Finger.R1
+    finger = gsdevice.Finger.R15
 
     if finger == gsdevice.Finger.R1:
         dev = gsdevice.Camera(finger, 0)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     if GPU: device = "cuda"
     else: device = "cpu"
-    nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R1)
+    nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R15)
     net = nn.load_nn(net_path, device)
 
     if SAVE_VIDEO_FLAG:
