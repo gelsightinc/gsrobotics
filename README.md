@@ -48,6 +48,9 @@ ROI x 0.000000, y 0.000000, w 1.000000 h 1.000000
 Encoder Buffer Size 81920
 
 
+Pressing Ctrl/C will return you to the terminal prompt.
+The video will still be running. See the steps below.
+
 # Check the video
 
 open a browser and go to link  <device>:8080/?action=stream
@@ -60,7 +63,10 @@ e.g.  http://gsr15demo.local:8080/?action=stream
 
 ssh pi@gsr15demo.local
 ps -aux | grep mjpg_str
-kill -9 pid
+
+   pi         739  5.1  0.0  80944  2008 ?        Sl   14:50   0:00 mjpg_streamer -i input_raspicam.so -fps 60 -x 480 -y 640 -rot 270 -quality 100 -awb off -awbgainR 1 -awbgainB 1 -o output_http.so -w ./www
+
+kill -9 739
 sudo shutdown now
 
 Connect to the R1.5 again as shown in the steps above
