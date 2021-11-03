@@ -66,7 +66,7 @@ def interpolate_gradients(gx, gy, img, cm, markermask):
     gx[(ind2not[:, 0], ind2not[:, 1])] = gx_interpol
     gy_interpol = griddata(ind2, gy[(ind2[:, 0], ind2[:, 1])], gy[(ind2not[:, 0], ind2not[:, 1])], method='nearest')
     gy[(ind2not[:, 0], ind2not[:, 1])] = gy_interpol
-    print (gy_interpol.shape, gx_interpol.shape, gx.shape, gy.shape)
+    #print (gy_interpol.shape, gx_interpol.shape, gx.shape, gy.shape)
 
     ''' interpolate using samples in the vicinity of marker '''
 
@@ -302,11 +302,11 @@ class Reconstruction3D:
 
         # print (gx.min(), gx.max(), gy.min(), gy.max())
         # nz = np.sqrt(1 - nx ** 2 - ny ** 2) ### normalize normals to get gradients for poisson
-        print(gy_interp.shape)
+        #print(gy_interp.shape)
         boundary = np.zeros((imgh, imgw))
         dm = poisson_reconstruct(gx_interp, gy_interp, boundary)
         dm = np.reshape(dm, (imgh, imgw))
-        print(dm.shape)
+        #print(dm.shape)
         # cv2.imshow('dm',dm)
 
         # dm = dm * mmpp * 1.
@@ -338,7 +338,7 @@ class Reconstruction3D:
         # # dm = dm.astype(np.uint8)
 
         ''' normalize gradients for plotting purpose '''
-        print(gx.min(), gx.max(), gy.min(), gy.max())
+        #print(gx.min(), gx.max(), gy.min(), gy.max())
         gx = (gx - gx.min()) / (gx.max() - gx.min())
         gy = (gy - gy.min()) / (gy.max() - gy.min())
         gx_interp = (gx_interp - gx_interp.min()) / (gx_interp.max() - gx_interp.min())
