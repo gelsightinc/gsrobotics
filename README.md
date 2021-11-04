@@ -1,5 +1,26 @@
 # SDK for GelSight robotic sensors
 
+# R1.5 device setup
+
+Your device has been configured with the following settings:
+
+Username: pi
+
+Password: gelsight
+    
+The address name of the R1.5 is on shown on small white sticker, right above the ethernet port on the Pi.
+
+e.g.  gsr1500x.local
+
+Add this address to your wired network:
+
+    Go to, Network Settings -> Wired connection
+    Add a new ethernet network by clicking the plus sign on the top right corner
+    In the field Name, put gsr1500X (name on the sticker without the .local)
+    In the same window, go to, IPv4 Setting -> Method -> select Link Local only
+    Save and exit
+    
+
 # Install the python code
 
     pip3 install .
