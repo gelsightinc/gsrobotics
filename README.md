@@ -24,6 +24,8 @@ Add this address to your wired network:
 # Install the python code
 
     pip3 install .
+    or 
+    pip3 install . --upgrade
 
 # Set paths
 
