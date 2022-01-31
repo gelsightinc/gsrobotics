@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from ximea import xiapi
 import enum
 
 # creating enumerations using class
@@ -35,6 +34,8 @@ class Camera:
 
         # This cam uses the ximea api, xiapi
         if self.name == Finger.R1:
+
+            from ximea import xiapi
 
             self.cam = xiapi.Camera(self.dev_id)
             self.cam.open_device()
