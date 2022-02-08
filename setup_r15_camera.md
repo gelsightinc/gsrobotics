@@ -32,7 +32,7 @@ In case you are starting with a fresh Raspberry Pi, follow the initial steps bel
     7. `sudo make install`
 
 
-![R1.5 connections](https://github.com/gelsightinc/gsrobotics/config/r15_connections.jpg?raw=true)
+![R1.5 connections](https://github.com/gelsightinc/gsrobotics/blob/main/r15_connections.jpg?raw=true)
 
 ## Start streaming (linux)
 1. Connect R1.5 to Raspberry Pi and your Linux computer as shows in the above image, and power up the Pi. 
