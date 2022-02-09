@@ -11,7 +11,7 @@ from gelsight import gsdevice
 from gelsight import gs3drecon
 from gelsightcore import poisson_reconstruct
 
-def get_diff_img(img1,img2):
+def get_diff_img(img1, img2):
     return np.clip((img1.astype(int) - img2.astype(int)), 0, 255).astype(np.uint8)
 
 def get_diff_img_2(img1, img2):
@@ -21,7 +21,7 @@ def main(argv):
 
     device = ""
     try:
-       opts, args = getopt.getopt(argv,"hd:",["device="])
+       opts, args = getopt.getopt(argv, "hd:", ["device="])
     except getopt.GetoptError:
        print('show3d.py -d <device>')
        sys.exit(2)
