@@ -25,8 +25,8 @@ class Camera:
         self.data = None
         self.name = dev_type
         self.dev_id = dev_id
-        self.imgw = 320
-        self.imgh = 240
+        self.imgw = 320 # this is for R1, R1.5 is 240
+        self.imgh = 240 # this is for R1, R1.5 is 320
         self.cam = None
         self.while_condition = 1
 
@@ -60,8 +60,10 @@ class Camera:
             self.cam = cv2.VideoCapture(self.dev_id)
             if self.cam is None or not self.cam.isOpened():
                 print('Warning: unable to open video source: ', self.dev_id)
-            self.imgw = 240
-            self.imgh = 320
+            self.imgw = 120 #int(self.cam.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.imgh = 160 #int(self.cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            self.fps = int(self.cam.get(cv2.CAP_PROP_FPS))
+            print('R1.5 image size = %d x %d at %d fps', self.imgw, self.imgh, self.fps)
 
         # not supporting this yet
         elif self.name == Finger.DIGIT:
@@ -77,7 +79,7 @@ class Camera:
 
         return self.cam
 
-    def get_image(self):
+    def get_raw_image(self):
         # Use ximea api, xiapi
         if self.name == Finger.R1:
             # create image handle
@@ -87,8 +89,44 @@ class Camera:
             f0 = cv2.resize(f0, (self.imgw, self.imgh))
         else:
             ret, f0 = self.cam.read()
-            f0 = f0[100:480, 45:415]
-            f0 = warp_perspective(f0, [[25, 25], [345, 25], [310, 380], [60, 380]], output_sz=(self.imgh, self.imgw))
+        self.data = cv2.cvtColor(f0, cv2.COLOR_BGR2RGB)
+        return self.data
+
+
+    def get_image(self, roi):
+        # Use ximea api, xiapi
+        if self.name == Finger.R1:
+            # create image handle
+            self.img = xiapi.Image()
+            self.cam.get_image(self.img)
+            f0 = self.img.get_image_data_numpy()
+            f0 = cv2.resize(f0, (self.imgw, self.imgh))
+        else:
+            # read the raw image
+            ret, f0 = self.cam.read()
+            # set warping parameters depending on the streamed image size
+            # currently only supports streaming 640x480 or 320x240
+            # see mjpg_streamer command running on the raspberry pi
+            if f0.shape == (640, 480, 3):
+                xorigin = 25
+                yorigin = 25
+                dx = 35
+            elif f0.shape == (320, 240, 3):
+                xorigin = 12
+                yorigin = 12
+                dx = 18
+
+            # crop the raw image
+            f0 = f0[int(roi[1]):int(roi[1]+roi[3]), int(roi[0]):int(roi[0]+roi[2])]
+            xdim = f0.shape[1]
+            ydim = f0.shape[0]
+
+            # warp the trapezoid, top left start, clockwise
+            f0 = warp_perspective(f0,
+                                [[xorigin, yorigin], [xdim-xorigin, yorigin],
+                                [xdim-xorigin-dx, ydim-yorigin], [xorigin+dx, ydim-yorigin]],
+                                output_sz=(self.imgh, self.imgw))
+
         self.data = cv2.cvtColor(f0, cv2.COLOR_BGR2RGB)
         return self.data
 

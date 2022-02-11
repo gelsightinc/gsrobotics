@@ -19,7 +19,12 @@ Add this address to your wired network:
     In the field Name, put gsr1500X (name on the sticker without the .local)
     In the same window, go to, IPv4 Setting -> Method -> select Link Local only
     Save and exit
-    
+
+# Setting up a static IP address
+
+If you want to change it so that you are using a static IP address, follow the instructions here:
+
+https://raspberrypi-guide.github.io/networking/set-up-static-ip-address
 
 # Install the python code
 
@@ -35,7 +40,26 @@ Add this address to your wired network:
 
     export PYTHONPATH=$PYDIR/gelsightcore:$PYDIR/gelsight:$PYTHONPATH
 
-# Connect to R1.5
+# R1.5
+
+# Check the video is running
+
+Open a browser and go to link  
+  http://gsr1500x.local:8080/?action=stream
+
+
+A service is running on the R1.5 that streams video once the device is turned on.  It is streaming video at 60 fps at a resolution of 240x320.
+
+To change the resolution or rate of streaming, you can ssh into the device and do the following:
+
+    1. stop the current service:
+        1. sudo systemctl stop mjpg_streamer_video.service 
+    2. change the parameters and restart the service:
+        1. edit /usr/bin/mjpg_streamer_video.sh
+        2. sudo systemctl restart mjpg_streamer_video.service
+
+Alternatively, you can stop the service as described above and use the script provided in the repository to connect and stream the video.
+
 In a separate terminal:
 
     ./connect.sh gsr15demo.local 
@@ -73,11 +97,6 @@ Password is gelsight
 
 Pressing Ctrl/C will return you to the terminal prompt.
 The video will still be running. See the steps below.
-
-# Check the video
-
-Open a browser and go to link  
-  http://gsr15demo.local:8080/?action=stream
 
 
 # Shutdown and restart device

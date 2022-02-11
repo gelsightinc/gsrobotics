@@ -36,6 +36,7 @@ def main(argv):
     SAVE_VIDEO_FLAG = False
     GPU = False
     MASK_MARKERS_FLAG = True
+    USE_CUSTOM_ROI = False
 
     # Path to 3d model
     path = '.'
@@ -75,16 +76,32 @@ def main(argv):
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         out = cv2.VideoWriter(file_path, fourcc, 60, (160, 120), isColor=True)
 
+    f0 = dev.get_raw_image()
+    if USE_CUSTOM_ROI:
+        roi = cv2.selectROI(f0)
+        roi_cropped = f0[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
+        cv2.imshow('ROI', roi_cropped)
+        print('Press q in ROI image to continue')
+        cv2.waitKey(0) 
+        cv2.destroyAllWindows()
+    elif f0.shape == (640,480,3):
+        roi = (60, 100, 375, 380)
+    elif f0.shape == (320,240,3):
+        roi = (30, 50, 186, 190)
+
+    print('roi = ', roi)
     ''' use this to plot just the 3d '''
     vis3d = gs3drecon.Visualize3D(dev.imgw, dev.imgh, '', mmpp)
 
     try:
         while dev.while_condition:
 
-            f1 = dev.get_image()
+            # get the roi image
+            f1 = dev.get_image(roi)
+            bigframe = cv2.resize(f1, (f1.shape[1]*2, f1.shape[0]*2))
+            cv2.imshow('Image', bigframe)
 
-            cv2.imshow('Image', f1)
-
+            # compute the depth map
             dm = nn.get_depthmap(f1, MASK_MARKERS_FLAG)
 
             ''' Display the results '''
