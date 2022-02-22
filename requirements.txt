@@ -1,12 +1,6 @@
-matplotlib==3.1.2
-numba==0.54.0
 numpy==1.17.4
-open3d==0.12.0
-opencv_contrib_python==4.5.1.48
-plantcv==3.13.0
-probreg==0.3.5
-scipy==1.6.3
+open3d==0.13.0
+opencv_python==3.4.17.61
+scipy==1.8.0
 setuptools==45.2.0
-tf==1.0.0
 torch==1.8.1
-utils==1.0.1
