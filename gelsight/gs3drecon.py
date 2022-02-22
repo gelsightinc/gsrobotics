@@ -10,7 +10,6 @@ import enum
 import os
 import cv2
 from scipy.interpolate import griddata
-from numba import njit,prange
 from gelsightcore import poisson_reconstruct
 
 # creating enumerations using class
@@ -130,7 +129,7 @@ def demark(gx, gy, markermask):
     gy_interp = interpolate_grad(gy.copy(), markermask)
     return gx_interp, gy_interp
 
-@njit(parallel=True)
+#@njit(parallel=True)
 def get_features(img,pixels,features,imgw,imgh):
     features[:,3], features[:,4]  = pixels[:,0] / imgh, pixels[:,1] / imgw
     for k in prange(len(pixels)):
