@@ -82,6 +82,7 @@ class Camera:
     def get_raw_image(self):
         # Use ximea api, xiapi
         if self.name == Finger.R1:
+            from ximea import xiapi
             # create image handle
             self.img = xiapi.Image()
             self.cam.get_image(self.img)
@@ -96,6 +97,7 @@ class Camera:
     def get_image(self, roi):
         # Use ximea api, xiapi
         if self.name == Finger.R1:
+            from ximea import xiapi
             # create image handle
             self.img = xiapi.Image()
             self.cam.get_image(self.img)

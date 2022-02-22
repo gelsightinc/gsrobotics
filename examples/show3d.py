@@ -28,6 +28,7 @@ def main(argv):
     for opt, arg in opts:
        if opt == '-h':
           print('show3d.py -d <device>')
+          print('Use R1 for R1 device, and gsr15???.local for R2 device')
           sys.exit()
        elif opt in ("-d", "--device"):
           device = arg
@@ -47,8 +48,11 @@ def main(argv):
     # mmpp = 0.0446  # for 640x480 img size R1
     # mmpp = 0.029 # for 1032x772 img size from R1
 
-    finger = gsdevice.Finger.R15
-    capturestream = "http://" + device + ":8080/?action=stream"
+    if device == "R1":
+        finger = gsdevice.Finger.R1
+    else:
+        finger = gsdevice.Finger.R15
+        capturestream = "http://" + device + ":8080/?action=stream"
 
     if finger == gsdevice.Finger.R1:
         dev = gsdevice.Camera(finger, 0)
@@ -65,10 +69,13 @@ def main(argv):
     net_path = os.path.join(model_file_path, net_file_path)
     print('net path = ', net_path)
 
-    if GPU: device = "cuda"
-    else: device = "cpu"
-    nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R15)
-    net = nn.load_nn(net_path, device)
+    if GPU: gpuorcpu = "cuda"
+    else: gpuorcpu = "cpu"
+    if device=="R1":
+        nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R1)
+    else:
+        nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R15)
+    net = nn.load_nn(net_path, gpuorcpu)
 
     if SAVE_VIDEO_FLAG:
         #### Below VideoWriter object will create a frame of above defined The output is stored in 'filename.avi' file.
@@ -88,6 +95,8 @@ def main(argv):
         roi = (60, 100, 375, 380)
     elif f0.shape == (320,240,3):
         roi = (30, 50, 186, 190)
+    else:
+        roi = (0, 0, f0.shape[1], f0.shape[0])
 
     print('roi = ', roi)
     ''' use this to plot just the 3d '''
