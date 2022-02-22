@@ -6,7 +6,7 @@
     or 
     pip3 install . --upgrade
 
-# Set paths
+# Set paths or run setup.sh script to set the following
 
     PYDIR=`pip3 show gelsight | grep -i location | cut -f2 -d" "`
 
@@ -162,6 +162,7 @@ Simply run this in a terminal to resolve the issue. More details on this can be 
 # Run the example to view the 3d data
 
     cd examples
+    python3 showimages.py -d R1
     python3 show3d.py -d R1
 
 
