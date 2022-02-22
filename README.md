@@ -156,6 +156,11 @@ You might have to increase the USB buffer size to read the XIMEA camera if you g
 Simply run this in a terminal to resolve the issue. More details on this can be found here.
 
     sudo tee /sys/module/usbcore/parameters/usbfs_memory_mb >/dev/null <<<0
+    
+# Run the example to view the 3d data
+
+    cd examples
+    python3 show3d.py -d R1
 
 
 # Contributing
