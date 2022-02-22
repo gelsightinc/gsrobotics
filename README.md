@@ -128,10 +128,6 @@ Install the XIMEA Linux Software Packge from the official XIMEA website. Details
     tar xzf XIMEA_Linux_SP.tgz
     cd package
     ./install
-    
-Test the camera using the XIMEA camera tools
-
-    /opt/XIMEA/bin/xiCamTool
 
 After you have installed the XIMEA package you can either use the GUI or use one of the python files (gs_ximea.py / gs_exaample.py). To use the python files you'd need to install the XIMEA python API. To do that just locate the XIMEA Software package that you have untarred (or unzipped). In the above example it's the folder named package.
 
@@ -144,10 +140,18 @@ select the folder v3 or v2 depending on your python version and copy all the con
 To know where the dist-packages folder, open python in a terminal and run
 
     import site; site.getsitepackages()
+    
+Test the camera using the XIMEA camera tools
+
+    /opt/XIMEA/bin/xiCamTool
 
 You might have to increase the USB buffer size to read the XIMEA camera if you get an error like this.
 
-    HA_USB_Device::Data_Read_Bulk_Async error: -1 endpoint:x81 Check that /sys/module/usbcore/parameters/usbfs_memory_mb is set to 0.
+    Acquisition failed to start due to insufficient system resources
+
+    HA_USB_Device::Data_Read_Bulk_Async error: -1 endpoint:x81 
+    
+    Check that /sys/module/usbcore/parameters/usbfs_memory_mb is set to 0.
 
 Simply run this in a terminal to resolve the issue. More details on this can be found here.
 
