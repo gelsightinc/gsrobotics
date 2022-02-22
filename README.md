@@ -1,5 +1,20 @@
 # SDK for GelSight robotic sensors
 
+# Install the python code
+
+    pip3 install .
+    or 
+    pip3 install . --upgrade
+
+# Set paths
+
+    PYDIR=`pip3 show gelsight | grep -i location | cut -f2 -d" "`
+
+    export LD_LIBRARY_PATH=$PYDIR/gelsightcore:$LD_LIBRARY_PATH
+
+    export PYTHONPATH=$PYDIR/gelsightcore:$PYDIR/gelsight:$PYTHONPATH
+
+
 # R1.5 device setup
 
 Your device has been configured with the following settings:
@@ -26,19 +41,6 @@ If you want to change it so that you are using a static IP address, follow the i
 
 https://raspberrypi-guide.github.io/networking/set-up-static-ip-address
 
-# Install the python code
-
-    pip3 install .
-    or 
-    pip3 install . --upgrade
-
-# Set paths
-
-    PYDIR=`pip3 show gelsight | grep -i location | cut -f2 -d" "`
-
-    export LD_LIBRARY_PATH=$PYDIR/gelsightcore:$LD_LIBRARY_PATH
-
-    export PYTHONPATH=$PYDIR/gelsightcore:$PYDIR/gelsight:$PYTHONPATH
 
 # R1.5
 
