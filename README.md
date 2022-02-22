@@ -165,6 +165,9 @@ Simply run this in a terminal to resolve the issue. More details on this can be 
     python3 showimages.py -d R1
     python3 show3d.py -d R1
 
+# Possible errors with cv2 try
+
+  pip uninstall opencv-python-headless
 
 # Contributing
 
