@@ -127,6 +127,11 @@ Install the XIMEA Linux Software Packge from the official XIMEA website. Details
     wget https://www.ximea.com/downloads/recent/XIMEA_Linux_SP.tgz
     tar xzf XIMEA_Linux_SP.tgz
     cd package
+    ./install
+    
+Test the camera using the XIMEA camera tools
+
+    /opt/XIMEA/bin/xiCamTool
 
 After you have installed the XIMEA package you can either use the GUI or use one of the python files (gs_ximea.py / gs_exaample.py). To use the python files you'd need to install the XIMEA python API. To do that just locate the XIMEA Software package that you have untarred (or unzipped). In the above example it's the folder named package.
 
@@ -134,7 +139,7 @@ After you have installed the XIMEA package you can either use the GUI or use one
 
 select the folder v3 or v2 depending on your python version and copy all the contents in the folder ximea to your python dist-packages folder.
 
-    cp -r ximea /usr/local/lib/python3.8/dist-packages
+    sudo cp -r ximea /usr/local/lib/python3.8/dist-packages
 
 To know where the dist-packages folder, open python in a terminal and run
 
