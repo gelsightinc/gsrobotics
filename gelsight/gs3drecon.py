@@ -226,7 +226,7 @@ class Reconstruction3D:
 
         return self.net
 
-    def get_depthmap(self, frame, mask_markers):
+    def get_depthmap(self, frame, mask_markers, cm=None):
         MARKER_INTERPOLATE_FLAG = mask_markers
 
         ''' find contact region '''
@@ -234,7 +234,8 @@ class Reconstruction3D:
         ###################################################################
         ### check these sizes
         ##################################################################
-        cm, cmindx = np.ones(frame.shape[:2]), np.where(np.ones(frame.shape[:2]))
+        if (cm is None):
+            cm, cmindx = np.ones(frame.shape[:2]), np.where(np.ones(frame.shape[:2]))
         imgh = frame.shape[:2][0]
         imgw = frame.shape[:2][1]
 
@@ -264,6 +265,10 @@ class Reconstruction3D:
         pxpos = np.vstack(np.where(cm)).T
         # pxpos[:, [1, 0]] = pxpos[:, [0, 1]] # swapping
         pxpos[:, 0], pxpos[:, 1] = pxpos[:, 0] / imgh, pxpos[:, 1] / imgw
+        # the neural net was trained using height=320, width=240
+        # pxpos[:, 0] = pxpos[:, 0] / ((320 / imgh) * imgh)
+        # pxpos[:, 1] = pxpos[:, 1] / ((240 / imgw) * imgw)
+
         features = np.column_stack((rgb, pxpos))
         features = torch.from_numpy(features).float().to(self.cpuorgpu)
         with torch.no_grad():
