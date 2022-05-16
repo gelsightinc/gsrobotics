@@ -165,9 +165,17 @@ Simply run this in a terminal to resolve the issue. More details on this can be 
     python3 showimages.py -d R1
     python3 show3d.py -d R1
 
-# Possible errors with cv2 try
+# Possible errors 
+### With cv2
 
-  pip uninstall opencv-python-headless
+    pip uninstall opencv-python-headless
+  
+### With Docker container
+
+    sudo apt-get install libopenjp2-7
+    sudo apt-get install qt5-default
+    pip3 install opencv-python==4.1.2.30
+    sudo apt-get install libopenexr-dev
 
 # Contributing
 
@@ -175,6 +183,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 # Contact
 
-This package is under active development. Contact radhen@gelsight.com if have any questions / comments / suggestions.
+This package is under active development. Contact debra_shure@gelsight.com or radhen@gelsight.com if have any questions / comments / suggestions.
 
 
