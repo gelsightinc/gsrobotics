@@ -1,5 +1,8 @@
 # SDK for GelSight robotic sensors
 
+# Prerequisites
+    Python 3.8
+
 # Install the python code
 
     pip3 install .
