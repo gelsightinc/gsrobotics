@@ -3,13 +3,9 @@ ___
 This respository contains python code, to connect to Gelsight robotic sensors that include, Mini, R1.5 and R1. The code enables basic functionalities, like 
 view and save data (images or video) from these devices, and an example code to get 3D point cloud data derived from 2D images.
 
-<<<<<<< Updated upstream
-# Prerequisites
+## Prerequisites
     Python 3.8
-
-# Install the python code
-=======
->>>>>>> Stashed changes
+    Ubuntu 20.04
 
 ## Install python libraries
     pip3 install .
