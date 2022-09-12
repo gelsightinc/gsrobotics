@@ -39,12 +39,18 @@ To install this library on ubuntu run,
     sudo apt-get update
     sudo apt-get -y install v4l-utils
 
-Refer to file config/mini_set_cam_params.sh present in this repository to view/edit all the available camera parameters. To set the camera parameters listed in mini_set_cam_params.sh file, run, 
+Refer to file config/mini_set_cam_params.sh present in this repository to view/edit all the available camera parameters. 
+You can list the devices by running:
 
-```sudo ./mini_set_cam_params-ctl.sh 2```
+```v4l2-ctl --list-devices```
+
+
+To set the camera parameters listed in mini_set_cam_params.sh file, run, 
+
+```sudo ./config/mini_set_cam_params-ctl.sh 2```
 
 Note the scripts takes the camera device id (0, or 1, or 2, or 3,.. etc), as the first argument. In most cases when you have one Mini connected to 
-you computers, the device ID is usually 2, because the webcam on your computer is always on device ID 0. 
+you computers, the device ID is usually 2, because the webcam on your computer is always on device ID 0.
 
 
 ## View raw 2D image
