@@ -1,5 +1,6 @@
 # SDK for GelSight robotic sensors
-___
+
+
 This respository contains python code, to connect to Gelsight robotic sensors that include, Mini, R1.5 and R1. The code enables basic functionalities, like 
 view and save data (images or video) from these devices, and an example code to get 3D point cloud data derived from 2D images.
 
@@ -27,7 +28,7 @@ or run setup.sh script to set the following
 
 
 # Mini
-___
+
 The instruction below pertain to GelSight Mini device. For R1.5 device, keep scrolling down.
 
 ## Device setup
@@ -59,7 +60,7 @@ To obtain expect results from the algorithms implemented on the raw image, pleas
 
 
 # R1.5
-___
+
 The instruction below pertain to GelSight R1.5 device. For R1 device, keep scrolling down.  
 
 ## Device setup
@@ -168,7 +169,6 @@ Once you are able to view the raw image, on the web link ```http://gsr150XX.loca
 
 
 # R1 Setup
-___ 
 
 The instruction below pertain to GelSight R1 device.
 
