@@ -51,8 +51,10 @@ def main(argv):
 
     if device == "R1":
         finger = gsdevice.Finger.R1
+        mmpp = 0.0887
     elif device[-5:] == "local":
         finger = gsdevice.Finger.R15
+        mmpp = 0.0887
         capturestream = "http://" + device + ":8080/?action=stream"
     elif device == "mini":
         finger = gsdevice.Finger.MINI
