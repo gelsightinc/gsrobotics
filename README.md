@@ -14,7 +14,7 @@ view and save data (images or video) from these devices, and an example code to 
     pip3 install . --upgrade
 
 Note this step does not install the [ROS](http://wiki.ros.org/ROS/Installation) or [ROS2](https://docs.ros.org/en/foxy/index.html) related 
-libraries required by the python scripts in examples/ros folder of this repository yet. Please follow  the installation guide of those seperately. 
+libraries required by the python scripts in examples/ros folder of this repository yet. Please follow the installation guide of those seperately. 
 
 
 ## Set paths 
@@ -62,7 +62,33 @@ you computers, the device ID is usually 2, because the webcam on your computer i
     cd examples
     python3 show3d.py -d mini
 
-To obtain expect results from the algorithms implemented on the raw image, please set the default camera parameters present in mini_set_cam_params.sh.  
+To obtain the expected results from the algorithms implemented on the raw image, please set the default camera parameters present in mini_set_cam_params.sh.  
+
+# Mini ROS and ROS2 
+
+## Prerequisites
+
+ROS or ROS2 should be intalled, see [ROS Documentation](https://docs.ros.org/) for instructions.
+The example code uses cv_bridge which can be installed using:
+    
+    sudo apt-get install ros-${ROS_DISTRO}-cv-bridge
+
+The showimages examples publish to the ROS topic /gsmini_rawimg_0
+
+The show3d examples publish to the ROS topic /pcd
+
+They can be viewed in rviz or rviz2
+
+## ROS examples
+    cd examples/ros
+    python3 showimages_ros.py
+    python3 show3d_ros.py -d mini
+
+## ROS2 examples
+    cd examples/ros
+    python3 showimages_ros2.py
+    python3 show3d_ros2.py -d mini
+    
 
 
 # R1.5
