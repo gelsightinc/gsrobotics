@@ -10,7 +10,6 @@ import enum
 import os
 import cv2
 from scipy.interpolate import griddata
-from numba import njit,prange
 from gelsightcore import poisson_reconstruct
 
 # creating enumerations using class
@@ -18,6 +17,7 @@ class Finger(enum.Enum):
     R1 = 1
     R15 = 2
     DIGIT = 3
+    MINI = 4
 
 def find_marker(gray):
     mask = cv2.inRange(gray, 0, 70)
@@ -130,10 +130,10 @@ def demark(gx, gy, markermask):
     gy_interp = interpolate_grad(gy.copy(), markermask)
     return gx_interp, gy_interp
 
-@njit(parallel=True)
+#@njit(parallel=True)
 def get_features(img,pixels,features,imgw,imgh):
     features[:,3], features[:,4]  = pixels[:,0] / imgh, pixels[:,1] / imgw
-    for k in prange(len(pixels)):
+    for k in range(len(pixels)):
         i,j = pixels[k]
         rgb = img[i, j] / 255.
         features[k,:3] = rgb
@@ -167,7 +167,7 @@ class RGB2NormNetR1(nn.Module):
         return x
 
 
-''' nn architecture for r1.5 '''
+''' nn architecture for r1.5 and mini '''
 class RGB2NormNetR15(nn.Module):
     def __init__(self):
         super(RGB2NormNetR15, self).__init__()
@@ -189,9 +189,11 @@ class RGB2NormNetR15(nn.Module):
         return x
 
 class Reconstruction3D:
-    def __init__(self, finger):
+    def __init__(self, finger, dev):
         self.finger = finger
         self.cpuorgpu = "cpu"
+        self.dm_zero_counter = 0
+        self.dm_zero = np.zeros((dev.imgw, dev.imgh))
         pass
 
     def load_nn(self, net_path, cpuorgpu):
@@ -227,7 +229,7 @@ class Reconstruction3D:
 
         return self.net
 
-    def get_depthmap(self, frame, mask_markers):
+    def get_depthmap(self, frame, mask_markers, cm=None):
         MARKER_INTERPOLATE_FLAG = mask_markers
 
         ''' find contact region '''
@@ -235,7 +237,8 @@ class Reconstruction3D:
         ###################################################################
         ### check these sizes
         ##################################################################
-        cm, cmindx = np.ones(frame.shape[:2]), np.where(np.ones(frame.shape[:2]))
+        if (cm is None):
+            cm, cmindx = np.ones(frame.shape[:2]), np.where(np.ones(frame.shape[:2]))
         imgh = frame.shape[:2][0]
         imgw = frame.shape[:2][1]
 
@@ -265,6 +268,10 @@ class Reconstruction3D:
         pxpos = np.vstack(np.where(cm)).T
         # pxpos[:, [1, 0]] = pxpos[:, [0, 1]] # swapping
         pxpos[:, 0], pxpos[:, 1] = pxpos[:, 0] / imgh, pxpos[:, 1] / imgw
+        # the neural net was trained using height=320, width=240
+        # pxpos[:, 0] = pxpos[:, 0] / ((320 / imgh) * imgh)
+        # pxpos[:, 1] = pxpos[:, 1] / ((240 / imgw) * imgw)
+
         features = np.column_stack((rgb, pxpos))
         features = torch.from_numpy(features).float().to(self.cpuorgpu)
         with torch.no_grad():
@@ -290,8 +297,8 @@ class Reconstruction3D:
         # nz[np.where(np.isnan(nz))] = 0
         # gx = nx / nz
         # gy = ny / nz
-        gx = nx
-        gy = ny
+        gx = nx / 0.73
+        gy = ny / 0.73
 
         if MARKER_INTERPOLATE_FLAG:
             # gx, gy = interpolate_gradients(gx, gy, img, cm, cmmm)
@@ -304,15 +311,22 @@ class Reconstruction3D:
         # nz = np.sqrt(1 - nx ** 2 - ny ** 2) ### normalize normals to get gradients for poisson
         #print(gy_interp.shape)
         boundary = np.zeros((imgh, imgw))
+
         dm = poisson_reconstruct(gx_interp, gy_interp, boundary)
         dm = np.reshape(dm, (imgh, imgw))
         #print(dm.shape)
         # cv2.imshow('dm',dm)
 
-        # dm = dm * mmpp * 1.
-        # dm[dm < 0] = 0
-        # dm = dm * mmpp
-        # dm = (dm+dm.min()) / 3.
+        ''' remove initial zero depth '''
+        if self.dm_zero_counter < 50:
+            self.dm_zero += dm
+            print ('zeroing depth. do not touch the gel!')
+            if self.dm_zero_counter == 49:
+                self.dm_zero /= self.dm_zero_counter
+        else:
+            print ('touch me!')
+        self.dm_zero_counter += 1
+        dm = dm - self.dm_zero
         # print(dm.min(), dm.max())
 
         ''' ENTIRE MASK. GPU OPTIMIZED VARIABLES. '''
@@ -380,7 +394,7 @@ class Visualize3D:
     def update(self, Z):
         self.depth2points(Z)
         dx, dy = np.gradient(Z)
-        dx, dy = dx * 2, dy * 2
+        dx, dy = dx * 0.5, dy * 0.5
 
         np_colors = dx + 0.5
         np_colors[np_colors < 0] = 0
@@ -404,3 +418,8 @@ class Visualize3D:
 
     def save_pointcloud(self):
         open3d.io.write_point_cloud(self.save_path + "pc_{}.pcd".format(self.cnt), self.pcd)
+
+
+
+
+
