@@ -5,3 +5,4 @@ opencv_contrib_python==4.5.5.62
 scipy==1.5.4
 setuptools==39.0.1
 torch==1.10.2
+
