@@ -47,7 +47,7 @@ You can list the devices by running:
 
 To set the camera parameters listed in mini_set_cam_params.sh file, run, 
 
-```sudo ./config/mini_set_cam_params-ctl.sh 2```
+```sudo ./config/mini_set_cam_params.sh 2```
 
 Note the scripts takes the camera device id (0, or 1, or 2, or 3,.. etc), as the first argument. In most cases when you have one Mini connected to 
 you computers, the device ID is usually 2, because the webcam on your computer is always on device ID 0.
