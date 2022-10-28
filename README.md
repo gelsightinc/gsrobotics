@@ -7,6 +7,9 @@ view and save data (images or video) from these devices, and an example code to 
 ## Prerequisites
     Python 3.8
     Ubuntu 20.04
+    
+Note: To use Ubuntu 18, clone the Ubuntu18 branch or 
+    ```git checkout Ubuntu18```
 
 ## Install python libraries
     pip3 install .
