@@ -5,11 +5,14 @@ This respository contains python code, to connect to Gelsight robotic sensors th
 view and save data (images or video) from these devices, and an example code to get 3D point cloud data derived from 2D images.
 
 ## Prerequisites
+## Ubuntu 20
     Python 3.8
     Ubuntu 20.04
     
-Note: To use Ubuntu 18, clone the Ubuntu18 branch or 
-    ```git checkout Ubuntu18```
+## Ubuntu 18 - clone the Ubuntu18 branch
+    git checkout Ubuntu18
+    Python 3.6.9
+    Ubuntu 18.04
 
 ## Install python libraries
     pip3 install .
