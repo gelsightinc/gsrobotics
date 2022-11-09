@@ -78,6 +78,16 @@ ROS or ROS2 should be intalled, see [ROS Documentation](https://docs.ros.org/) f
 The example code uses cv_bridge which can be installed using:
     
     sudo apt-get install ros-${ROS_DISTRO}-cv-bridge
+    
+For example, on Ubuntu 20, 
+
+    To install cv-bridge for ROS
+    
+        sudo apt-get install ros-noetic-cv-bridge
+        
+    To install cv-bridge for ROS2
+    
+        sudo apt-get install ros-foxy-cv-bridge
 
 The showimages examples publish to the ROS topic /gsmini_rawimg_0
 
