@@ -101,12 +101,14 @@ They can be viewed in rviz or rviz2
     roscore
     python3 showimages_ros.py
     python3 show3d_ros.py -d mini
+    rviz -d mini_ros_3d_config.rviz
 
 ## ROS2 examples
     source /opt/ros/foxy/setup.bash
     cd examples/ros
     python3 showimages_ros2.py
     python3 show3d_ros2.py -d mini
+    rviz2 -d mini_ros2_3d_config.rviz
     
 
 
