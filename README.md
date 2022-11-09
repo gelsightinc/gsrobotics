@@ -98,6 +98,7 @@ They can be viewed in rviz or rviz2
 ## ROS examples
     source /opt/ros/noetic/setup.bash
     cd examples/ros
+    roscore
     python3 showimages_ros.py
     python3 show3d_ros.py -d mini
 
