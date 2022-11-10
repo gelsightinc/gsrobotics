@@ -74,10 +74,20 @@ To obtain the expected results from the algorithms implemented on the raw image,
 
 ## Prerequisites
 
-ROS or ROS2 should be intalled, see [ROS Documentation](https://docs.ros.org/) for instructions.
+Install [ROS](http://wiki.ros.org/ROS/Installation) or [ROS2](https://docs.ros.org/en/foxy/index.html) , see [ROS Documentation](https://docs.ros.org/) for instructions.
 The example code uses cv_bridge which can be installed using:
     
     sudo apt-get install ros-${ROS_DISTRO}-cv-bridge
+    
+For example, on Ubuntu 20, 
+
+    To install cv-bridge for ROS
+    
+        sudo apt-get install ros-noetic-cv-bridge
+        
+    To install cv-bridge for ROS2
+    
+        sudo apt-get install ros-foxy-cv-bridge
 
 The showimages examples publish to the ROS topic /gsmini_rawimg_0
 
@@ -86,14 +96,19 @@ The show3d examples publish to the ROS topic /pcd
 They can be viewed in rviz or rviz2
 
 ## ROS examples
+    source /opt/ros/noetic/setup.bash
     cd examples/ros
+    roscore
     python3 showimages_ros.py
     python3 show3d_ros.py -d mini
+    rviz -d mini_ros_3d_config.rviz
 
 ## ROS2 examples
+    source /opt/ros/foxy/setup.bash
     cd examples/ros
     python3 showimages_ros2.py
     python3 show3d_ros2.py -d mini
+    rviz2 -d mini_ros2_3d_config.rviz
     
 
 

@@ -49,28 +49,32 @@ def main(argv):
     MASK_MARKERS_FLAG = True
     FIND_ROI = False
     PUBLISH_ROS_PC = True
+    SHOW_3D_NOW = False
 
     # Path to 3d model
     path = '.'
 
     # Set the camera resolution
     # mmpp = 0.0887  # for 240x320 img size
-    # mmpp = 0.1778  # for 160x120 img size from R1
-    # mmpp = 0.0446  # for 640x480 img size R1
-    # mmpp = 0.029 # for 1032x772 img size from R1
     mmpp = 0.081  # r2d2 gel 18x24mm at 240x320
-    mpp = mmpp / 1000.
 
     if device == "R1":
         finger = gsdevice.Finger.R1
+        # mmpp = 0.1778  # for 160x120 img size from R1
+        # mmpp = 0.0446  # for 640x480 img size R1
+        # mmpp = 0.029 # for 1032x772 img size from R1
     elif device[-5:] == "local":
         finger = gsdevice.Finger.R15
         capturestream = "http://" + device + ":8080/?action=stream"
     elif device == "mini":
         finger = gsdevice.Finger.MINI
+        mmpp = 0.0625
     else:
         print('Unknown device name')
         print('Use R1 for R1 device \ngsr15???.local for R1.5 device \nmini for mini device')
+
+    # This is meters per pixel that is used for ros visualization
+    mpp = mmpp / 1000.
 
     if finger == gsdevice.Finger.R1:
         dev = gsdevice.Camera(finger, 0)
@@ -123,9 +127,6 @@ def main(argv):
         gelpcd.points = open3d.utility.Vector3dVector(points)
         gelpcd_pub = rospy.Publisher("/gsmini_pcd", PointCloud2, queue_size=10)
 
-
-
-
     f0 = dev.get_raw_image()
     if FIND_ROI:
         roi = cv2.selectROI(f0)
@@ -141,8 +142,7 @@ def main(argv):
     elif f0.shape == (240, 320, 3):
         ''' cropping is hard coded in resize_crop_mini() function in gsdevice.py file '''
         border_size = 0  # default values set for mini to get 3d
-        roi = (
-        border_size, border_size, 320 - 2 * border_size, 240 - 2 * border_size)  # default values set for mini to get 3d
+        roi = (border_size, border_size, 320 - 2 * border_size, 240 - 2 * border_size)  # default values set for mini to get 3d
     else:
         roi = (0, 0, f0.shape[1], f0.shape[0])
 
@@ -150,10 +150,11 @@ def main(argv):
     print('press q on image to exit')
 
     ''' use this to plot just the 3d '''
-    if device == 'mini':
-        vis3d = gs3drecon.Visualize3D(dev.imgh, dev.imgw, '', mmpp)
-    else:
-        vis3d = gs3drecon.Visualize3D(dev.imgw, dev.imgh, '', mmpp)
+    if SHOW_3D_NOW:
+        if device == 'mini':
+            vis3d = gs3drecon.Visualize3D(dev.imgh, dev.imgw, '', mmpp)
+        else:
+            vis3d = gs3drecon.Visualize3D(dev.imgw, dev.imgh, '', mmpp)
 
     try:
         rate = rospy.Rate(60)
@@ -162,13 +163,14 @@ def main(argv):
             # get the roi image
             f1 = dev.get_image(roi)
             bigframe = cv2.resize(f1, (f1.shape[1] * 2, f1.shape[0] * 2))
-            cv2.imshow('Image', bigframe)
+            #cv2.imshow('Image', bigframe)
 
             # compute the depth map
             dm = nn.get_depthmap(f1, MASK_MARKERS_FLAG)
 
             ''' Display the results '''
-            vis3d.update(dm)
+            if SHOW_3D_NOW:
+                vis3d.update(dm)
 
             if PUBLISH_ROS_PC:
                 print ('publishing ros point cloud')
@@ -182,8 +184,8 @@ def main(argv):
                 gelpcdros = pcl2.create_cloud_xyz32(header, np.asarray(gelpcd.points))
                 gelpcd_pub.publish(gelpcdros)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            #if cv2.waitKey(1) & 0xFF == ord('q'):
+            #    break
             if SAVE_VIDEO_FLAG:
                 out.write(f1)
 
