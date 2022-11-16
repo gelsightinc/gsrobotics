@@ -65,12 +65,6 @@ def main(argv):
 
     dev.connect()
 
-    if SAVE_VIDEO_FLAG:
-        #### Below VideoWriter object will create a frame of above defined The output is stored in 'filename.avi' file.
-        file_path = './3dnnlive.mov'
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(file_path, fourcc, 60, (160, 120), isColor=True)
-
     f0 = dev.get_raw_image()
     print('image size = ', f0.shape[1], f0.shape[0])
     if FIND_ROI:
@@ -93,6 +87,12 @@ def main(argv):
 
     print('roi = ', roi)
     print('press q on image to exit')
+
+    if SAVE_VIDEO_FLAG:
+        #### Below VideoWriter object will create a frame of above defined The output is stored in 'filename.avi' file.
+        file_path = './3dlive.mov'
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        out = cv2.VideoWriter(file_path, fourcc, 60, (f0.shape[1], f0.shape[0]), isColor=True)
 
     try:
         while dev.while_condition:
