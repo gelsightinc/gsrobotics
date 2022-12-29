@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import pickle as pk
 # import cv2.aruco as aruco
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from scipy.spatial import distance as dist
 # from Robotics.tactile_sdk_local.marker_tracking.tracking.src import setting
 # from Robotics.tactile_sdk_local.marker_tracking.tracking.src.marker_dectection import *
