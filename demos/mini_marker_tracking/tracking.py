@@ -4,10 +4,10 @@ import find_marker
 import numpy as np
 import cv2
 import time
-import marker_dectection
+import marker_detection
 import sys
 import setting
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import pickle as pk
 #from utils.live_ximea import GelSight
 from camera_calibration import warp_perspective
@@ -65,7 +65,7 @@ imgw = 320
 imgh = 240
 
 USE_LIVE_R1 = False
-calibrate = True
+calibrate = False
 border_size = 25
 
 outdir = './TEST/'
@@ -133,9 +133,9 @@ while 1:
             ##########################
             frame = resize_crop_mini(frame, imgw, imgh)
             ### find marker masks
-            mask = marker_dectection.find_marker(frame)
+            mask = marker_detection.find_marker(frame)
             ### find marker centers
-            mc = marker_dectection.marker_center(mask, frame)
+            mc = marker_detection.marker_center(mask, frame)
             break
 
         counter += 1
@@ -227,15 +227,15 @@ try:
         # # undistort
         # frame = cv2.undistort(frame, mtx, dist, None, newcameramtx)
         # # frame = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
-        # frame = marker_dectection.init(frame)
-        # frame = marker_dectection.init_HSR(frame)
+        # frame = marker_detection.init(frame)
+        # frame = marker_detection.init_HSR(frame)
         ############################################################
 
         ### find marker masks
-        mask = marker_dectection.find_marker(frame)
+        mask = marker_detection.find_marker(frame)
 
         ### find marker centers
-        mc = marker_dectection.marker_center(mask, frame)
+        mc = marker_detection.marker_center(mask, frame)
 
         if calibrate == False:
             tm = time.time()
@@ -264,7 +264,7 @@ try:
             # trim(diff)
 
             # # draw flow
-            marker_dectection.draw_flow(frame, flow)
+            marker_detection.draw_flow(frame, flow)
 
         #mask_img = mask.astype(frame[0].dtype)
         mask_img = np.asarray(mask)
