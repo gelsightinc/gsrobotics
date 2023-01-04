@@ -68,7 +68,11 @@ you computers, the device ID is usually 2, because the webcam on your computer i
     cd examples
     python3 show3d.py -d mini
 
-To obtain the expected results from the algorithms implemented on the raw image, please set the default camera parameters present in mini_set_cam_params.sh.  
+To obtain the expected results from the algorithms implemented on the raw image, please set the default camera parameters present in mini_set_cam_params.sh.
+
+## Mini Marker Tracking
+    cd demos/mini_marker_tracking
+    python3 tracking.py
 
 # Mini ROS and ROS2 
 
