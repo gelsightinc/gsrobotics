@@ -9,7 +9,6 @@ import open3d
 import copy
 from gelsight import gsdevice
 from gelsight import gs3drecon
-from gelsightcore import poisson_reconstruct
 
 def get_diff_img(img1, img2):
     return np.clip((img1.astype(int) - img2.astype(int)), 0, 255).astype(np.uint8)
@@ -19,7 +18,7 @@ def get_diff_img_2(img1, img2):
 
 def main(argv):
 
-    device = ""
+    device = "mini"
     try:
        opts, args = getopt.getopt(argv, "hd:", ["device="])
     except getopt.GetoptError:
@@ -73,7 +72,7 @@ def main(argv):
     elif finger == gsdevice.Finger.MINI:
         # the device ID can change after chaning the usb ports.
         # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
-        cam_id = gsdevice.get_camera_id("Arducam USB Camera")
+        cam_id = gsdevice.get_camera_id("GelSight Mini")
         dev = gsdevice.Camera(finger, cam_id)
         net_file_path = 'nnmini.pt'
 
