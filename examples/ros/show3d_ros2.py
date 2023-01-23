@@ -92,7 +92,7 @@ class PCDPublisher(Node):
         elif finger == gsdevice.Finger.MINI:
             # the device ID can change after chaning the usb ports.
             # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
-            cam_id = gsdevice.get_camera_id("Arducam USB Camera")
+            cam_id = gsdevice.get_camera_id("GelSight Mini")
             self.dev = gsdevice.Camera(finger, cam_id)
             net_file_path = '../nnmini.pt'
 

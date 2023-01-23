@@ -24,17 +24,42 @@ def warp_perspective(img, corners, output_sz):
 
 def get_camera_id(camera_name):
     cam_num = None
-    for file in os.listdir("/sys/class/video4linux"):
-        real_file = os.path.realpath("/sys/class/video4linux/" + file + "/name")
-        with open(real_file, "rt") as name_file:
-            name = name_file.read().rstrip()
-        if camera_name in name:
-            cam_num = int(re.search("\d+$", file).group(0))
-            found = "FOUND!"
-        else:
-            found = "      "
-        print("{} {} -> {}".format(found, file, name))
+    if os.name == 'nt':
+        cam_num = find_cameras_windows()
+    else:
+        for file in os.listdir("/sys/class/video4linux"):
+            real_file = os.path.realpath("/sys/class/video4linux/" + file + "/name")
+            with open(real_file, "rt") as name_file:
+                name = name_file.read().rstrip()
+            if camera_name in name:
+                cam_num = int(re.search("\d+$", file).group(0))
+                found = "FOUND!"
+            else:
+                found = "      "
+            print("{} {} -> {}".format(found, file, name))
+
     return cam_num
+
+def find_cameras_windows():
+    # checks the first 10 indexes.
+    index = 0
+    arr = []
+    idVendor = 0xC45
+    idProduct = 0x636D
+    import usb.core
+    import usb.backend.libusb1
+    backend = usb.backend.libusb1.get_backend(
+        find_library=lambda x: "libusb_win/libusb-1.0.dll"
+    )
+    dev = usb.core.find(backend=backend, find_all=True)
+    # loop through devices, printing vendor and product ids in decimal and hex
+    for cfg in dev:
+        #print('Decimal VendorID=' + hex(cfg.idVendor) + ' & ProductID=' + hex(cfg.idProduct) + '\n')
+        if cfg.idVendor == idVendor and cfg.idProduct == idProduct:
+            arr.append(index)
+        index += 1
+
+    return arr[0]
 
 
 def resize_crop_mini(img, imgw, imgh):
