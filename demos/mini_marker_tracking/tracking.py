@@ -71,6 +71,7 @@ border_size = 25
 outdir = './TEST/'
 SAVE_VIDEO_FLAG = False
 SAVE_ONE_IMG_FLAG = False
+SAVE_DATA_FLAG = False
 
 if SAVE_ONE_IMG_FLAG:
     sn = input('Please enter the serial number of the gel \n')
@@ -89,6 +90,10 @@ if SAVE_ONE_IMG_FLAG:
     if not os.path.exists(imgdir):
         os.mkdir(imgdir)
 
+if SAVE_DATA_FLAG:
+    datadir = outdir + 'data'
+    datafilename = datadir + 'marker_locations.txt'
+    datafile = open(datafilename,"a")
 
 # if len(sys.argv) > 1:
 #     if sys.argv[1] == 'calibrate':
@@ -183,6 +188,7 @@ if SAVE_ONE_IMG_FLAG:
 
 m = find_marker.Matching(N_,M_,fps_,x0_,y0_,dx_,dy_)
 
+frameno = 0
 try:
     while (WHILE_COND):
 
@@ -265,6 +271,15 @@ try:
 
             # # draw flow
             marker_detection.draw_flow(frame, flow)
+
+            frameno = frameno + 1
+
+            if SAVE_DATA_FLAG:
+                Ox, Oy, Cx, Cy, Occupied = flow
+                for i in range(len(Ox)):
+                    for j in range(len(Ox[i])):
+                        datafile.write(
+                           f"{frameno}, {i}, {j}, {Ox[i][j]:.2f}, {Oy[i][j]:.2f}, {Cx[i][j]:.2f}, {Cy[i][j]:.2f}\n")
 
         #mask_img = mask.astype(frame[0].dtype)
         mask_img = np.asarray(mask)
