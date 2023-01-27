@@ -264,7 +264,7 @@ def main(argv):
                     for i in range(len(Ox)):
                         for j in range(len(Ox[i])):
                             datafile.write(
-                               f"{frameno}, {i}, {j}, {Ox[i][j]:.0f}, {Oy[i][j]:.0f}, {Cx[i][j]:.0f}, {Cy[i][j]:.0f}\n")
+                               f"{frameno:6d}, {i:3d}, {j:3d}, {Ox[i][j]:6.2f}, {Oy[i][j]:6.2f}, {Cx[i][j]:6.2f}, {Cy[i][j]:6.2f}\n")
 
             #mask_img = mask.astype(frame[0].dtype)
             mask_img = np.asarray(mask)
