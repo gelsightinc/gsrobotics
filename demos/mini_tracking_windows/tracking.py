@@ -67,12 +67,12 @@ def main(argv):
 
     USE_LIVE_R1 = False
     calibrate = False
-    border_size = 25
 
     outdir = './TEST/'
-    SAVE_VIDEO_FLAG = False
-    SAVE_ONE_IMG_FLAG = False
+
+    SAVE_VIDEO_FLAG = True
     SAVE_DATA_FLAG = True
+    SAVE_ONE_IMG_FLAG = False
 
     if SAVE_ONE_IMG_FLAG:
         sn = input('Please enter the serial number of the gel \n')
@@ -105,8 +105,8 @@ def main(argv):
                 count = count + 1;
             else:
                 needcount = False;
-
         datafile = open(outfile,"w")
+        vidfile = datadir + '/video_' + str(count) + '.avi'
 
     # if len(sys.argv) > 1:
     #     if sys.argv[1] == 'calibrate':
@@ -118,13 +118,9 @@ def main(argv):
         WHILE_COND = 1
     else:
         cameras = find_cameras()
-        cap = cv2.VideoCapture(cameras[0])
+        cap = cv2.VideoCapture(0)
         # cap = cv2.VideoCapture('http://pi:robits@raspiatgelsightinc.local:8080/?action=stream')
-        # cap = cv2.VideoCapture('/home/radhen/Downloads/GS-Mini_Test_X-Axis.avi')
         WHILE_COND = cap.isOpened()
-
-    # set the format into MJPG in the FourCC format
-    cap.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc('M','J','P','G'))
 
     # Resize scale for faster image processing
     setting.init()
@@ -139,12 +135,12 @@ def main(argv):
 
     frame0 = None
 
-
     counter = 0
     while 1:
         if counter<50:
             ret, frame = cap.read()
             print ('flush black imgs')
+
 
             if counter == 48:
                 ret, frame = cap.read()
@@ -154,12 +150,12 @@ def main(argv):
                 mask = marker_detection.find_marker(frame)
                 ### find marker centers
                 mc = marker_detection.marker_center(mask, frame)
+
                 break
 
             counter += 1
 
     counter = 0
-
 
     mccopy = mc
     mc_sorted1 = mc[mc[:,0].argsort()]
@@ -221,34 +217,10 @@ def main(argv):
             frame = resize_crop_mini(frame, imgw, imgh)
             raw_img = copy.deepcopy(frame)
 
-            # frame = frame[55:,:]
-            # frame = cv2.resize(frame, (imgw, imgh))
-
-
             ''' EXTRINSIC calibration ... 
             ... the order of points [x_i,y_i] | i=[1,2,3,4], are same 
             as they appear in plt.imshow() image window. Put them in 
             clockwise order starting from the topleft corner'''
-            # frame = frame[30:400, 70:400]
-            # frame = warp_perspective(frame, [[35, 15], [320, 15], [290, 360], [65, 360]], output_sz=frame.shape[:2])   # params for small dots
-            # frame = warp_perspective(frame, [[180, 130], [880, 130], [800, 900], [260, 900]], output_sz=(640,480)) # org. img size (1080x1080)
-
-
-            ### intrinsic calibration
-            # path = '/home/radhen/Documents/tactile_sdk_local/utils/camera_intrinsic_params/'
-            # with open(path + "mtx.txt", "rb") as fp:  # Unpickling
-            #     mtx = pk.load(fp)
-            # with open(path + "dist.txt", "rb") as fp:  # Unpickling
-            #     dist = pk.load(fp)
-            # img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # h, w = img_gray.shape[:2]
-            # newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-            # # undistort
-            # frame = cv2.undistort(frame, mtx, dist, None, newcameramtx)
-            # # frame = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
-            # frame = marker_detection.init(frame)
-            # frame = marker_detection.init_HSR(frame)
-            ############################################################
 
             ### find marker masks
             mask = marker_detection.find_marker(frame)
