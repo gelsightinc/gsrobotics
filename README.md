@@ -14,9 +14,9 @@ view and save data (images or video) from these devices, and an example code to 
     Ubuntu 18.04
 
 ## Install python libraries
+    pip3 uninstall gelsight
     pip3 install .
-    or 
-    pip3 install . --upgrade
+
 
 Note this step does not install the [ROS](http://wiki.ros.org/ROS/Installation) or [ROS2](https://docs.ros.org/en/foxy/index.html) related 
 libraries required by the python scripts in examples/ros folder of this repository yet. Please follow the installation guide of those seperately. 
@@ -276,6 +276,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 
 # Contact
-This package is under active development. Contact debra_shure@gelsight.com or radhen@gelsight.com if have any questions / comments / suggestions.
+This package is under active development. Contact debra_shure@gelsight.com if have any questions / comments / suggestions.
 
 
