@@ -57,6 +57,7 @@ def main(argv):
         capturestream = "http://" + device + ":8080/?action=stream"
     elif device == "mini":
         finger = gsdevice.Finger.MINI
+        mmpp = 0.0625
     else:
         print('Unknown device name')
         print('Use R1 for R1 device \ngsr15???.local for R1.5 device \nmini for mini device')

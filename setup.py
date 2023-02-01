@@ -2,9 +2,8 @@ from setuptools import setup
 
 setup(
     name='gelsight',
-    version='1.0',
-    packages=['gelsight', 'gelsightcore'],
-    package_data={'gelsightcore': ['*.so*']},
+    version='2.0',
+    packages=['gelsight'],
     license='',
     author='gelsight',
     author_email='info@gelsight.com',

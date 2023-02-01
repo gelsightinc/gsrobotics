@@ -9,8 +9,7 @@ view and save data (images or video) from these devices, and an example code to 
     Python 3.8
     Ubuntu 20.04
     
-## Ubuntu 18 - clone the Ubuntu18 branch
-    git checkout Ubuntu18
+## Ubuntu 18
     Python 3.6.9
     Ubuntu 18.04
 
@@ -21,16 +20,6 @@ view and save data (images or video) from these devices, and an example code to 
 
 Note this step does not install the [ROS](http://wiki.ros.org/ROS/Installation) or [ROS2](https://docs.ros.org/en/foxy/index.html) related 
 libraries required by the python scripts in examples/ros folder of this repository yet. Please follow the installation guide of those seperately. 
-
-
-## Set paths 
-or run setup.sh script to set the following
-
-    PYDIR=`pip3 show gelsight | grep -i location | cut -f2 -d" "`
-
-    export LD_LIBRARY_PATH=$PYDIR/gelsightcore:$LD_LIBRARY_PATH
-
-    export PYTHONPATH=$PYDIR/gelsightcore:$PYDIR/gelsight:$PYTHONPATH
 
 
 # Mini

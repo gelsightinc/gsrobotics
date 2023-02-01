@@ -142,7 +142,7 @@ def get_features(img,pixels,features,imgw,imgh):
 #
 # 2D integration via Poisson solver
 #
-def poisson_reconstruct(grady, gradx, boundarysrc):
+def poisson_reconstruct(gradx, grady, boundarysrc):
     # Laplacian
     gyy = grady[1:,:-1] - grady[:-1,:-1]
     gxx = gradx[:-1,1:] - gradx[:-1,:-1]
