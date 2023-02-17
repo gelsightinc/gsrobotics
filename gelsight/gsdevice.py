@@ -25,7 +25,7 @@ def warp_perspective(img, corners, output_sz):
 def get_camera_id(camera_name):
     cam_num = None
     if os.name == 'nt':
-        cam_num = find_cameras_windows()
+        cam_num = find_cameras_windows(camera_name)
     else:
         for file in os.listdir("/sys/class/video4linux"):
             real_file = os.path.realpath("/sys/class/video4linux/" + file + "/name")
@@ -40,26 +40,26 @@ def get_camera_id(camera_name):
 
     return cam_num
 
-def find_cameras_windows():
-    # checks the first 10 indexes.
-    index = 0
-    arr = []
-    idVendor = 0xC45
-    idProduct = 0x636D
-    import usb.core
-    import usb.backend.libusb1
-    backend = usb.backend.libusb1.get_backend(
-        find_library=lambda x: "libusb_win/libusb-1.0.dll"
-    )
-    dev = usb.core.find(backend=backend, find_all=True)
-    # loop through devices, printing vendor and product ids in decimal and hex
-    for cfg in dev:
-        #print('Decimal VendorID=' + hex(cfg.idVendor) + ' & ProductID=' + hex(cfg.idProduct) + '\n')
-        if cfg.idVendor == idVendor and cfg.idProduct == idProduct:
-            arr.append(index)
-        index += 1
+def find_cameras_windows(camera_name):
 
-    return arr[0]
+    from pygrabber.dshow_graph import FilterGraph
+    graph = FilterGraph()
+
+    # get the device name
+    allcams = graph.get_input_devices() # list of camera device
+    description = ""
+    for cam in allcams:
+        if camera_name in cam:
+            description = cam
+    try:
+        device = graph.get_input_devices().index(description)
+    except ValueError as e:
+        print("Device is not in this list")
+        print(graph.get_input_devices())
+        import sys
+        sys.exit()
+
+    return device
 
 
 def resize_crop_mini(img, imgw, imgh):

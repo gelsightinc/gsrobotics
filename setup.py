@@ -8,8 +8,7 @@ setup(
     author='gelsight',
     author_email='info@gelsight.com',
     install_requires=[
-        'numpy', 'numba', 'open3d', 'opencv_python_headless', 'scipy', 'torch',
-        'opencv-contrib-python'
+        'numpy', 'numba', 'open3d', 'opencv_python', 'scipy', 'torch'
     ],
     description='A toolkit to interface with Gelsight tactile devices'
 )

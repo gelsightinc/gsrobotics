@@ -1,6 +1,6 @@
-numpy==1.17.4
-open3d==0.13.0
-opencv_python==3.4.17.61
-scipy==1.8.0
-setuptools==45.2.0
-torch==1.8.1
+numpy >= 1.17.4
+open3d >= 0.13.0
+opencv_python >= 3.4.17.61
+scipy >= 1.8.0
+setuptools >= 45.2.0
+torch >= 1.8.1

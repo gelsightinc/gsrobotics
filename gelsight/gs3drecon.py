@@ -460,7 +460,7 @@ class Visualize3D:
 
         #### SAVE POINT CLOUD TO A FILE
         if self.save_path != '':
-            open3d.io.write_point_cloud(self.save_path + "pc_{}.pcd".format(self.cnt), self.pcd)
+            open3d.io.write_point_cloud(self.save_path + "/pc_{}.pcd".format(self.cnt), self.pcd)
 
         self.cnt += 1
 
