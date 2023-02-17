@@ -177,7 +177,6 @@ def poisson_reconstruct(gradx, grady, boundarysrc):
     #cv2.idft(tt.T, img_tt)
     tt = scipy.fftpack.idst(f, norm='ortho')
     img_tt = scipy.fftpack.idst(tt.T, norm='ortho').T
-    print('tt shape = ', tt.shape)
     # New center + old boundary
     result = boundary
     result[1:-1,1:-1] = img_tt
@@ -371,8 +370,8 @@ class Reconstruction3D:
             print ('zeroing depth. do not touch the gel!')
             if self.dm_zero_counter == 49:
                 self.dm_zero /= self.dm_zero_counter
-        else:
-            print ('touch me!')
+        if self.dm_zero_counter == 50:
+            print ('Ok to touch me now!')
         self.dm_zero_counter += 1
         dm = dm - self.dm_zero
         # print(dm.min(), dm.max())
