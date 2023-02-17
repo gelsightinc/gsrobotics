@@ -5,21 +5,22 @@ This respository contains python code, to connect to Gelsight robotic sensors th
 view and save data (images or video) from these devices, and an example code to get 3D point cloud data derived from 2D images.
 
 ## Prerequisites
-## Ubuntu 20
-    Python 3.8
-    Ubuntu 20.04
-    
-## Ubuntu 18
-    Python 3.6.9
-    Ubuntu 18.04
+
+    Python 3.6.9 or above
 
 ## Install python libraries
-    pip3 uninstall gelsight
     pip3 install .
-
+    or 
+    pip3 install . --upgrade
 
 Note this step does not install the [ROS](http://wiki.ros.org/ROS/Installation) or [ROS2](https://docs.ros.org/en/foxy/index.html) related 
 libraries required by the python scripts in examples/ros folder of this repository yet. Please follow the installation guide of those seperately. 
+
+
+## Set paths 
+
+    PYDIR=`pip3 show gelsight | grep -i location | cut -f2 -d" "`
+    export PYTHONPATH=$PYDIR/gelsightcore:$PYDIR/gelsight:$PYTHONPATH
 
 
 # Mini
@@ -29,6 +30,8 @@ The instruction below pertain to GelSight Mini device. For R1.5 device, keep scr
 ## Device setup
 
 The camera on Mini is a USB camera. You can change the camera parameters using any app or library that can control UVC cameras. On Ubuntu, one such popular library is [v4l2-ctl](https://manpages.ubuntu.com/manpages/bionic/man1/v4l2-ctl.1.html).
+
+## Linux setup
 To install this library on ubuntu run, 
 
     sudo apt-get update
@@ -37,25 +40,32 @@ To install this library on ubuntu run,
 Refer to file config/mini_set_cam_params.sh present in this repository to view/edit all the available camera parameters. 
 You can list the devices by running:
 
-```v4l2-ctl --list-devices```
+    v4l2-ctl --list-devices
 
 
 To set the camera parameters listed in mini_set_cam_params.sh file, run, 
 
-```sudo ./config/mini_set_cam_params.sh 2```
+    sudo ./config/mini_set_cam_params.sh 2
 
 Note the scripts takes the camera device id (0, or 1, or 2, or 3,.. etc), as the first argument. In most cases when you have one Mini connected to 
 you computers, the device ID is usually 2, because the webcam on your computer is always on device ID 0.
 
+## Windows setup
+
+The script tries to find the correct camera device id on Windows.
+You may need to change the following line in show3d.py and showimages.py
+
+    dev = gsdevice.Camera(finger, 1)
+
 
 ## View raw 2D image
     cd examples
-    python3 showimages.py -d mini
+    python3 showimages.py
 
 
 ## View 3d point cloud data
     cd examples
-    python3 show3d.py -d mini
+    python3 show3d.py
 
 To obtain the expected results from the algorithms implemented on the raw image, please set the default camera parameters present in mini_set_cam_params.sh.
 
@@ -276,6 +286,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 
 # Contact
-This package is under active development. Contact debra_shure@gelsight.com if have any questions / comments / suggestions.
+This package is under active development. Contact debra_shure@gelsight.com or radhen@gelsight.com if have any questions / comments / suggestions.
 
 
