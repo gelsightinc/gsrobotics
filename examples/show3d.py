@@ -1,12 +1,7 @@
 import sys, getopt
 import numpy as np
 import cv2
-import math
 import os
-from os import listdir
-from os.path import isfile, join
-import open3d
-import copy
 from gelsight import gsdevice
 from gelsight import gs3drecon
 
@@ -71,7 +66,7 @@ def main(argv):
         dev = gsdevice.Camera(finger, capturestream)
         net_file_path = 'nnr15.pt'
     elif finger == gsdevice.Finger.MINI:
-        # the device ID can change after chaning the usb ports.
+        # the device ID can change after unplugging and changing the usb ports.
         # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
         cam_id = gsdevice.get_camera_id("GelSight Mini")
         dev = gsdevice.Camera(finger, cam_id)
@@ -99,6 +94,8 @@ def main(argv):
         out = cv2.VideoWriter(file_path, fourcc, 60, (160, 120), isColor=True)
 
     f0 = dev.get_raw_image()
+    roi = (0, 0, f0.shape[1], f0.shape[0])
+
     if FIND_ROI:
         roi = cv2.selectROI(f0)
         roi_cropped = f0[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
@@ -106,16 +103,14 @@ def main(argv):
         print('Press q in ROI image to continue')
         cv2.waitKey(0) 
         cv2.destroyAllWindows()
-    elif f0.shape == (640,480,3):
+    elif f0.shape == (640,480,3) and device != 'mini':
         roi = (60, 100, 375, 380)
-    elif f0.shape == (320,240,3):
+    elif f0.shape == (320,240,3) and device != 'mini':
         roi = (30, 50, 186, 190)
-    elif f0.shape == (240,320,3):
+    elif f0.shape == (240,320,3) and device != 'mini':
         ''' cropping is hard coded in resize_crop_mini() function in gsdevice.py file '''
         border_size = 0 # default values set for mini to get 3d
         roi = (border_size,border_size,320-2*border_size,240-2*border_size) # default values set for mini to get 3d
-    else:
-        roi = (0, 0, f0.shape[1], f0.shape[0])
 
     print('roi = ', roi)
     print('press q on image to exit')
