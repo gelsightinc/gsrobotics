@@ -1,6 +1,3 @@
-from os import listdir
-from os.path import isfile, join
-import scipy, scipy.fftpack
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,6 +8,8 @@ import enum
 import os
 import cv2
 from scipy.interpolate import griddata
+from scipy import fftpack
+
 
 
 # creating enumerations using class
@@ -98,7 +97,6 @@ def interpolate_grad(img, mask):
     mask_around = (dilate(mask, ksize=3, iter=2) > 0) & ~(mask != 0)
     # mask_around = mask == 0
     mask_around = mask_around.astype(np.uint8)
-    # cv2.imshow("mask_around", mask_around*1.)
 
     x, y = np.arange(img.shape[0]), np.arange(img.shape[1])
     yy, xx = np.meshgrid(y, x)
@@ -142,48 +140,54 @@ def get_features(img,pixels,features,imgw,imgh):
 #
 # 2D integration via Poisson solver
 #
-def poisson_reconstruct(gradx, grady, boundarysrc):
-    # Laplacian
-    gyy = grady[1:,:-1] - grady[:-1,:-1]
-    gxx = gradx[:-1,1:] - gradx[:-1,:-1]
-    f = np.zeros(boundarysrc.shape)
-    f[:-1,1:] += gxx
-    f[1:,:-1] += gyy
-    # Boundary image
-    boundary = boundarysrc.copy()
-    boundary[1:-1,1:-1] = 0;
+def poisson_dct_neumaan(gx,gy):
 
-    # Subtract boundary contribution
-    f_bp = -4*boundary[1:-1,1:-1] + boundary[1:-1,2:] + boundary[1:-1,0:-2] + boundary[2:,1:-1] + boundary[0:-2,1:-1]
-    f = f[1:-1,1:-1] - f_bp
+    gxx = 1 * (gy[(list(range(1,gx.shape[0]))+[gx.shape[0]-1]), :] - gy[([0]+list(range(gx.shape[0]-1))), :])
+    gyy = 1 * (gx[:, (list(range(1,gx.shape[1]))+[gx.shape[1]-1])] - gx[:, ([0]+list(range(gx.shape[1]-1)))])
+    f = gxx + gyy
 
-    # Discrete Sine Transform
-    #tt = np.zeros(boundarysrc.shape)
-    #fsin = np.zeros(boundarysrc.shape)
-    #cv2.dft(f, tt)
-    #cv2.dft(tt.T, fsin)
-    #cv2.namedWindow('dft')
-    #cv2.imshow('dft',fsin)
-    #cv2.waitKey()
-    tt = scipy.fftpack.dst(f, norm='ortho')
-    fsin = scipy.fftpack.dst(tt.T, norm='ortho').T
-    # Eigenvalues
-    (x,y) = np.meshgrid(range(1,f.shape[1]+1), range(1,f.shape[0]+1), copy=True)
-    denom = (2*np.cos(math.pi*x/(f.shape[1]+2))-2) + (2*np.cos(math.pi*y/(f.shape[0]+2)) - 2)
-    f = fsin/denom
-    # Inverse Discrete Sine Transform
-    #img_tt = np.zeros(f.shape)
-    #cv2.idft(f, tt)
-    #cv2.idft(tt.T, img_tt)
-    tt = scipy.fftpack.idst(f, norm='ortho')
-    img_tt = scipy.fftpack.idst(tt.T, norm='ortho').T
-    # New center + old boundary
-    result = boundary
-    result[1:-1,1:-1] = img_tt
-    return result
+    ### Right hand side of the boundary condition
+    b = np.zeros(gx.shape)
+    b[0,1:-2] = -gy[0,1:-2]
+    b[-1,1:-2] = gy[-1,1:-2]
+    b[1:-2,0] = -gx[1:-2,0]
+    b[1:-2,-1] = gx[1:-2,-1]
+    b[0,0] = (1/np.sqrt(2))*(-gy[0,0] - gx[0,0])
+    b[0,-1] = (1/np.sqrt(2))*(-gy[0,-1] + gx[0,-1])
+    b[-1,-1] = (1/np.sqrt(2))*(gy[-1,-1] + gx[-1,-1])
+    b[-1,0] = (1/np.sqrt(2))*(gy[-1,0]-gx[-1,0])
 
+    ## Modification near the boundaries to enforce the non-homogeneous Neumann BC (Eq. 53 in [1])
+    f[0,1:-2] = f[0,1:-2] - b[0,1:-2]
+    f[-1,1:-2] = f[-1,1:-2] - b[-1,1:-2]
+    f[1:-2,0] = f[1:-2,0] - b[1:-2,0]
+    f[1:-2,-1] = f[1:-2,-1] - b[1:-2,-1]
 
+    ## Modification near the corners (Eq. 54 in [1])
+    f[0,-1] = f[0,-1] - np.sqrt(2) * b[0,-1]
+    f[-1,-1] = f[-1,-1] - np.sqrt(2) * b[-1,-1]
+    f[-1,0] = f[-1,0] - np.sqrt(2) * b[-1,0]
+    f[0,0] = f[0,0] - np.sqrt(2) * b[0,0]
 
+    ## Cosine transform of f
+    tt = fftpack.dct(f, norm='ortho')
+    fcos = fftpack.dct(tt.T, norm='ortho').T
+
+    # Cosine transform of z (Eq. 55 in [1])
+    (x, y) = np.meshgrid(range(1, f.shape[1] + 1), range(1, f.shape[0] + 1), copy=True)
+    denom = 4 * ( (np.sin(0.5*math.pi*x/(f.shape[1])))**2 + (np.sin(0.5*math.pi*y/(f.shape[0])))**2)
+
+    # 4 * ((sin(0.5 * pi * x / size(p, 2))). ^ 2 + (sin(0.5 * pi * y / size(p, 1))). ^ 2)
+
+    f = -fcos / denom
+    # Inverse Discrete cosine Transform
+    tt = fftpack.idct(f, norm='ortho')
+    img_tt = fftpack.idct(tt.T, norm='ortho').T
+
+    img_tt = img_tt.mean() + img_tt
+    # img_tt = img_tt - img_tt.min()
+
+    return img_tt
 
 
 class RGB2NormNetR1(nn.Module):
@@ -252,12 +256,12 @@ class Reconstruction3D:
             print('Error opening ', net_path, ' does not exist')
             return
 
-        print('self.finger = ', self.finger)
+        #print('self.finger = ', self.finger)
         if self.finger == Finger.R1:
             print('calling nn R1...')
             net = RGB2NormNetR1().float().to(device)
         elif self.finger == Finger.R15:
-            print('calling nn R15...')
+            print(f'calling nn with {net_path}')
             net = RGB2NormNetR15().float().to(device)
         else:
             net = RGB2NormNetR15().float().to(device)
@@ -338,14 +342,13 @@ class Reconstruction3D:
         # gx = (b-a) * ((gx - gx.min()) / (gx.max() - gx.min())) + a
         # gy = (b-a) * ((gy - gy.min()) / (gy.max() - gy.min())) + a
         '''OPTION#2 calculate gx, gy from nx, ny. '''
-        # nz = np.sqrt(1 - nx ** 2 - ny ** 2)
-        # if np.isnan(nz).any():
-        #     print ('nan found')
-        # nz[np.where(np.isnan(nz))] = 0
-        # gx = nx / nz
-        # gy = ny / nz
-        gx = nx / 0.73
-        gy = ny / 0.73
+        ### normalize normals to get gradients for poisson
+        nz = np.sqrt(1 - nx ** 2 - ny ** 2)
+        if np.isnan(nz).any():
+            print ('nan found')
+        nz[np.where(np.isnan(nz))] = 0
+        gx = nx / nz
+        gy = ny / nz
 
         if MARKER_INTERPOLATE_FLAG:
             # gx, gy = interpolate_gradients(gx, gy, img, cm, cmmm)
@@ -354,12 +357,10 @@ class Reconstruction3D:
         else:
             gx_interp, gy_interp = gx, gy
 
-        # print (gx.min(), gx.max(), gy.min(), gy.max())
-        # nz = np.sqrt(1 - nx ** 2 - ny ** 2) ### normalize normals to get gradients for poisson
-        #print(gy_interp.shape)
+        # nz = np.sqrt(1 - nx ** 2 - ny ** 2)
         boundary = np.zeros((imgh, imgw))
 
-        dm = poisson_reconstruct(gx_interp, gy_interp, boundary)
+        dm = poisson_dct_neumaan(gx_interp, gy_interp)
         dm = np.reshape(dm, (imgh, imgw))
         #print(dm.shape)
         # cv2.imshow('dm',dm)
