@@ -1,23 +1,10 @@
-import copy
 import cv2
-import os
-import matplotlib.pyplot as plt
-import numpy as np
-import subprocess
-import psutil
-import time
 from PIL import Image
-from multiprocessing import Process
-from threading import Thread
-import time
-import threading
 from threading import Thread, Lock
 import rclpy
 from rclpy.node import Node  # Enables the use of rclpy's Node class
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-import random
-
 
 
 class CameraPublisher(Node):

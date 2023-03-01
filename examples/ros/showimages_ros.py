@@ -1,22 +1,9 @@
-import copy
 import cv2
-import os
-import matplotlib.pyplot as plt
 import numpy as np
-import subprocess
-import psutil
-import time
-from PIL import Image
-from multiprocessing import Process
-from threading import Thread
-import time
-import threading
 from threading import Thread, Lock
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-
-
 
 
 def flat_field_correction(f0, img, counter, num_init_frames, KJ):
