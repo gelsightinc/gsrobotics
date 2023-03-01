@@ -1,15 +1,11 @@
 import sys, getopt
 import numpy as np
 import cv2
-import math
 import os
-from os import listdir
-from os.path import isfile, join
 import open3d
 import copy
 from gelsight import gsdevice
 from gelsight import gs3drecon
-from gelsightcore import poisson_reconstruct
 import rospy
 from sensor_msgs.msg import PointCloud2
 import std_msgs.msg

@@ -1,20 +1,14 @@
 import sys, getopt
 import numpy as np
 import cv2
-import math
 import os
-from os import listdir
-from os.path import isfile, join
-import open3d
 import copy
 from gelsight import gsdevice
 from gelsight import gs3drecon
-from gelsightcore import poisson_reconstruct
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2, PointField
 import std_msgs.msg
-
 
 
 def get_diff_img(img1, img2):
