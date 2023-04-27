@@ -1,5 +1,4 @@
 import copy
-
 import find_marker
 import numpy as np
 import cv2
@@ -7,10 +6,6 @@ import time
 import marker_detection
 import sys
 import setting
-#import matplotlib.pyplot as plt
-import pickle as pk
-#from utils.live_ximea import GelSight
-from camera_calibration import warp_perspective
 import os
 
 def find_cameras():
@@ -132,7 +127,6 @@ def main(argv):
         cameras = find_cameras()
         cap = cv2.VideoCapture(cameras[0])
         # cap = cv2.VideoCapture('http://pi:robits@raspiatgelsightinc.local:8080/?action=stream')
-        # cap = cv2.VideoCapture('/home/radhen/Downloads/GS-Mini_Test_X-Axis.avi')
         WHILE_COND = cap.isOpened()
 
     # set the format into MJPG in the FourCC format
@@ -244,23 +238,6 @@ def main(argv):
             # frame = frame[30:400, 70:400]
             # frame = warp_perspective(frame, [[35, 15], [320, 15], [290, 360], [65, 360]], output_sz=frame.shape[:2])   # params for small dots
             # frame = warp_perspective(frame, [[180, 130], [880, 130], [800, 900], [260, 900]], output_sz=(640,480)) # org. img size (1080x1080)
-
-
-            ### intrinsic calibration
-            # path = '/home/radhen/Documents/tactile_sdk_local/utils/camera_intrinsic_params/'
-            # with open(path + "mtx.txt", "rb") as fp:  # Unpickling
-            #     mtx = pk.load(fp)
-            # with open(path + "dist.txt", "rb") as fp:  # Unpickling
-            #     dist = pk.load(fp)
-            # img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # h, w = img_gray.shape[:2]
-            # newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-            # # undistort
-            # frame = cv2.undistort(frame, mtx, dist, None, newcameramtx)
-            # # frame = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
-            # frame = marker_detection.init(frame)
-            # frame = marker_detection.init_HSR(frame)
-            ############################################################
 
             ### find marker masks
             mask = marker_detection.find_marker(frame)
