@@ -10,13 +10,13 @@ if __name__ == "__main__":
     imgw = 320
     imgh = 240
     SAVE_VIDEO_FLAG = True
-    USE_MINI = False
+    USE_MINI_LIVE = True
 
     DRAW_MARKERS = True
     if SAVE_VIDEO_FLAG:
         DRAW_MARKERS = False
 
-    if USE_MINI:
+    if USE_MINI_LIVE:
         gs = gsdevice.Camera(gsdevice.Finger.MINI, 0)
         WHILE_COND = 1
         gs.connect()
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         out = cv2.VideoWriter('flow.mov',fourcc, 60.0, (imgw,imgh)) # The fps depends on CPU
 
-    if USE_MINI:
+    if USE_MINI_LIVE:
         f0 = gs.get_raw_image()
         #f0 = cv2.resize(f0, (imgw, imgh))
         f0gray = cv2.cvtColor(f0, cv2.COLOR_BGR2GRAY)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     try:
         while (WHILE_COND):
 
-            if USE_MINI:
+            if USE_MINI_LIVE:
                 curr = gs.get_raw_image()
                 curr_gray = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
             else:
@@ -112,7 +112,7 @@ if __name__ == "__main__":
             if SAVE_VIDEO_FLAG:
                 out.write(offrame)
 
-        if USE_MINI:
+        if USE_MINI_LIVE:
             gs.stop_video()
         else:
             cap.release()
