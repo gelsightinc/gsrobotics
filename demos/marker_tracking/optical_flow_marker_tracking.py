@@ -9,8 +9,12 @@ if __name__ == "__main__":
 
     imgw = 320
     imgh = 240
-    SAVE_VIDEO_FLAG = False
+    SAVE_VIDEO_FLAG = True
     USE_MINI = False
+
+    DRAW_MARKERS = True
+    if SAVE_VIDEO_FLAG:
+        DRAW_MARKERS = False
 
     if USE_MINI:
         gs = gsdevice.Camera(gsdevice.Finger.MINI, 0)
@@ -80,7 +84,6 @@ if __name__ == "__main__":
             if len(good_new) < nct:
                 # Detect new features in the current frame
                 print(f"all pts did not converge")
-                #p0 = good_old.reshape(-1, 1, 2)
             else:
                 # Update points for next iteration
                 p0 = good_new.reshape(-1, 1, 2)
@@ -88,14 +91,15 @@ if __name__ == "__main__":
             # Draw the tracks
             for i, (new, old) in enumerate(zip(good_new, good_old)):
                 a, b = new.ravel()
-                # c, d = old.ravel()
-                c = int(Ox[i])
-                d = int(Oy[i])
-                offrame = cv2.circle(curr, (int(a), int(b)), 5, color[i].tolist(), -1)
-                offrame = cv2.line(offrame, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+                ix = int(Ox[i])
+                iy = int(Oy[i])
+                offrame = cv2.arrowedLine(curr, (ix,iy), (int(a), int(b)), (255,255,255), thickness=1, line_type=cv2.LINE_8, tipLength=.15)
+                #offrame = cv2.line(curr, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+                if DRAW_MARKERS:
+                    offrame = cv2.circle(offrame, (int(a), int(b)), 5, color[i].tolist(), -1)
 
             # Show the video with the optical flow tracks overlaid
-            cv2.imshow('optical flow frame', offrame)
+            cv2.imshow('optical flow frame', cv2.resize(offrame, (2*offrame.shape[1], 2*offrame.shape[0])))
             k = cv2.waitKey(30) & 0xff
             if k == 27:
                 break
@@ -106,7 +110,7 @@ if __name__ == "__main__":
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             if SAVE_VIDEO_FLAG:
-                out.write(curr)
+                out.write(offrame)
 
         if USE_MINI:
             gs.stop_video()
