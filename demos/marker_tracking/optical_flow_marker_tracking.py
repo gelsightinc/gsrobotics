@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
             print('Interrupted!')
-            if USE_MINI:
+            if USE_MINI_LIVE:
                 gs.stop_video()
             else:
                 cap.release()
