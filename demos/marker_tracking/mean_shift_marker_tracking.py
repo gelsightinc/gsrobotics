@@ -10,6 +10,7 @@ from gs_utils import RGB2NormNet
 from gs_utils import poisson_dct_neumaan
 from gs_utils import Visualize3D
 from gs_utils import write_tmd
+from gelsight import gsdevice
 from markertracker import MarkerTracker
 
 def compute_depth_map(img, markermask, net, device):
@@ -59,13 +60,10 @@ def compute_depth_map(img, markermask, net, device):
 
     return dm
 
-def process_marker_gel(cal_video_filename, video_filename, nnet_filename, options, output_filepath=''):
-
-    if not os.path.isfile(cal_video_filename) or not os.path.isfile(video_filename) or not os.path.isfile(nnet_file):
-        print(f'Input files do not exits {cal_video_filename} or {video_filename} or {nnet_file}')
-        exit(-1)
+def process_marker_gel(video_filename, nnet_filename, options, output_filepath=''):
 
     # Options
+    USE_MINI_LIVE = options['USE_MINI_LIVE']
     GPU = options['GPU']
     SHOW_3D = options['SHOW_3D']
     SAVE_MARKER_FLAG = options['SAVE_MARKER_FLAG']
@@ -95,28 +93,31 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
     tmdcounter = 0
     pcdcounter = 0
 
-    ''' Load neural network '''
-    if GPU:
-        device = torch.device("cuda")
-    else:
-        device = torch.device("cpu")
-
-    net = RGB2NormNet().float().to(device)
-    if GPU:
-        ### load weights on gpu
-        # net.load_state_dict(torch.load(net_path))
-        checkpoint = torch.load(nnet_filename, map_location=lambda storage, loc: storage.cuda(0))
-        net.load_state_dict(checkpoint['state_dict'])
-    else:
-        ### load weights on cpu which were actually trained on gpu
-        checkpoint = torch.load(nnet_filename, map_location=lambda storage, loc: storage)
-        net.load_state_dict(checkpoint['state_dict'])
-
-    ''' use this to plot just the 3d '''
     if SHOW_3D:
-        vis3d = Visualize3D(imgw, imgh, mmpp, '')
+        # Check that input files exist
+        if not os.path.isfile(nnet_file):
+            print(f'Input model file does not exits {nnet_file}')
+            exit(-1)
 
-    ''''''
+        ''' Load neural network '''
+        if GPU:
+            device = torch.device("cuda")
+        else:
+            device = torch.device("cpu")
+
+        net = RGB2NormNet().float().to(device)
+        if GPU:
+            ### load weights on gpu
+            # net.load_state_dict(torch.load(net_path))
+            checkpoint = torch.load(nnet_filename, map_location=lambda storage, loc: storage.cuda(0))
+            net.load_state_dict(checkpoint['state_dict'])
+        else:
+            ### load weights on cpu which were actually trained on gpu
+            checkpoint = torch.load(nnet_filename, map_location=lambda storage, loc: storage)
+            net.load_state_dict(checkpoint['state_dict'])
+
+        ''' use this to plot just the 3d '''
+        vis3d = Visualize3D(imgw, imgh, mmpp, '')
 
     needcount = True;
     if SAVE_MARKER_FLAG:
@@ -154,61 +155,84 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
     WARMUP = 10
     frame0 = None
 
-    capnone = cv2.VideoCapture(cal_video_filename)
+    if USE_MINI_LIVE:
+        gs = gsdevice.Camera(gsdevice.Finger.MINI, 0)
+        WHILE_COND = 1
+        gs.connect()
+    else:
+        vidinput = cv2.VideoCapture(video_filename)
+        WHILE_COND = vidinput.isOpened()
+        if not vidinput.isOpened():
+            print(f'Error opening video {video_filename}')
 
+    print('--- Getting initial markers. Gel should not be touching anything ---')
     counter = 0
     NUM_INIT_FRAMES = 10
-    while counter < NUM_INIT_FRAMES and capnone.isOpened():
-        ret, frame0 = capnone.read()
+    while counter < NUM_INIT_FRAMES:
+        if USE_MINI_LIVE:
+            frame0 = gs.get_raw_image()
+        else:
+            ret, frame0 = vidinput.read()
+
         frame = cv2.resize(frame0, (imgw, imgh))
         counter = counter + 1
-        cv2.imwrite('frame0_1.png', frame)
         if counter == NUM_INIT_FRAMES:
             img = np.float32(frame) / 255.0
             mtracker = MarkerTracker(img)
-
-    # Retrieve and display images
-    NUM_INIT_FRAMES = 30
-    dm_zero_counter = 0
-    dm_zero = np.zeros(frame.shape[:2])
-    dm = np.zeros(frame.shape[:2])
-    Oz = np.zeros(frame.shape[:2])
 
     marker_centers = mtracker.marker_center
     Ox = marker_centers[:, 1]
     Oy = marker_centers[:, 0]
     nct = len(marker_centers)
 
-    print('--- Processing zeroing depth. Gel should not be touching anything ---')
-    while (capnone.isOpened() and dm_zero_counter < NUM_INIT_FRAMES):
+    if SHOW_3D:
+        # Retrieve and display images
+        NUM_INIT_FRAMES = 30
+        dm_zero_counter = 0
+        dm_zero = np.zeros(frame.shape[:2])
+        dm = np.zeros(frame.shape[:2])
+        Oz = np.zeros(frame.shape[:2])
 
-        ret, image_in = capnone.read()
+        print('--- Processing zeroing depth. Gel should not be touching anything ---')
+        while (dm_zero_counter < NUM_INIT_FRAMES):
 
-        img = cv2.resize(image_in, (imgw, imgh))
+            if USE_MINI_LIVE:
+                image_in = gs.get_raw_image()
+            else:
+                ret, image_in = vidinput.read()
+                if not ret:
+                    print(f'Error reading video {video_filename}')
 
-        markermask = mtracker.marker_mask
-        markermask = markermask.astype('uint8')
-        dm = compute_depth_map(img, markermask, net, device)
-        # put the depth map in mm
-        # dm = dm * mmpp * 1
+            img = cv2.resize(image_in, (imgw, imgh))
 
-        ''' remove initial zero depth '''
-        if dm_zero_counter < NUM_INIT_FRAMES:
-            dm_zero = dm_zero + dm
-            if dm_zero_counter == NUM_INIT_FRAMES - 1:
-                dm_zero = dm_zero / dm_zero_counter
-                print(f'Finished processing zero depth on {cal_video_filename}')
-        dm_zero_counter += 1
-        dm = dm - dm_zero
+            markermask = mtracker.marker_mask
+            markermask = markermask.astype('uint8')
+            dm = compute_depth_map(img, markermask, net, device)
+            # put the depth map in mm
+            # dm = dm * mmpp * 1
 
-    Oz = dm
+            ''' remove initial zero depth '''
+            if dm_zero_counter < NUM_INIT_FRAMES:
+                dm_zero = dm_zero + dm
+                if dm_zero_counter == NUM_INIT_FRAMES - 1:
+                    dm_zero = dm_zero / dm_zero_counter
+                    print(f'Finished processing zero depth.')
+            dm_zero_counter += 1
+            dm = dm - dm_zero
 
+        Oz = dm
+
+    print('press q on display to quit')
     # Retrieve and display images
     frame_count = 0
-    cap = cv2.VideoCapture(video_filename)
-    while (cap.isOpened()):
+    while (WHILE_COND):
 
-        success, frame = cap.read()
+        if USE_MINI_LIVE:
+            frame = gs.get_raw_image()
+            if frame.shape[1] == imgw and frame.shape[0] == imgh:
+                success = True
+        else:
+            success, frame = vidinput.read()
 
         if success != True:
             cv2.destroyAllWindows()
@@ -227,11 +251,11 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
             markermask = markermask.astype('uint8')
 
             # Compute the depth
-            dm = compute_depth_map(image_in, markermask, net, device)
-
-            # put the depth map in mm
-            # dm = dm * mmpp * 1
-            dm = dm - dm_zero
+            if SHOW_3D:
+                dm = compute_depth_map(image_in, markermask, net, device)
+                # put the depth map in mm
+                # dm = dm * mmpp * 1
+                dm = dm - dm_zero
 
             centers = marker_centers
             pts = currentpos
@@ -245,10 +269,7 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
                     cv2.drawMarker(image_in, pt2, markerType=cv2.MARKER_CROSS, color=(0, 255, 0), markerSize=2)
             cv2.imshow('Marker Frame', cv2.resize(image_in, (2 * img.shape[1], 2 * img.shape[0])))
             #cv2.imshow('Marker Mask', cv2.resize(markermask, (2*markermask.shape[1], 2*markermask.shape[0])))
-            cv2.waitKey(20)
-
-
-            #print('depth_min (mm):', float(f'{dm.min():.4f}'), 'depth_max (mm):', float(f'{dm.max():.4f}'))
+            cv2.waitKey(10)
 
             ''' visualize 3d '''
             if SHOW_3D:
@@ -286,12 +307,18 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
                     col = int(Cx[i])
                     mrow = int(ycoords[i])
                     mcol = int(xcoords[i])
-                    datafile.write(
+                    if SHOW_3D:
+                        datafile.write(
+                                f"{frame_count:6d}, {mrow:3d}, {mcol:3d}, "
+                                f"{Ox[i]:6.2f}, {Oy[i]:6.2f}, {Oz[row][col]:6.2f}, "
+                                f"{Cx[i]:6.2f}, {Cy[i]:6.2f}, {dm[row][col]:6.2f}\n")
+                    else:
+                        datafile.write(
                             f"{frame_count:6d}, {mrow:3d}, {mcol:3d}, "
-                            f"{Ox[i]:6.2f}, {Oy[i]:6.2f}, {Oz[row][col]:6.2f}, "
-                            f"{Cx[i]:6.2f}, {Cy[i]:6.2f}, {dm[row][col]:6.2f}\n")
+                            f"{Ox[i]:6.2f}, {Oy[i]:6.2f}, "
+                            f"{Cx[i]:6.2f}, {Cy[i]:6.2f}\n")
 
-            if SAVE_3D_TMD:
+            if SHOW_3D and SAVE_3D_TMD:
                 tmdname = 'depthmap_{}.tmd'.format(frame_count)
                 write_tmd(os.path.join(output_filepath, tmdname), dm, mmpp)
                 print('saved ', tmdname, ' to ', output_filepath)
@@ -299,7 +326,6 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
                 pcdname = 'pointcloud_{}.pcd'.format(frame_count)
                 vis3d.save(os.path.join(output_filepath, pcdname))
                 print('saved ', pcdname, ' to ', output_filepath)
-
 
             ''' Display the results '''
             mask_img = mask*255
@@ -311,7 +337,7 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
             if counter%250 == 0:
                 print(f'Processed {counter} frames')
 
-            keyval = cv2.waitKey(5) & 0xFF
+            keyval = cv2.waitKey(1) & 0xFF
             if keyval == ord('q'):
                 print ('Exiting')
                 break
@@ -326,11 +352,16 @@ def process_marker_gel(cal_video_filename, video_filename, nnet_filename, option
                 print('saved ', pcdname, ' to ', output_filepath)
                 pcdcounter += 1
 
+    if USE_MINI_LIVE:
+        gs.stop_video()
+    else:
+        vidinput.release()
+        cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
 
     net_filename = "nnmini.pt"
-    cal_filename = "mini_example.avi"
     vid_filename = "mini_example.avi"
 
     user_dir = os.path.expanduser('~')
@@ -341,11 +372,11 @@ if __name__ == '__main__':
     model_file_path = os.path.join(curr_dir, "../../examples")
     nnet_file = os.path.join(model_file_path, net_filename)
 
-    cal_video_filename = os.path.join(data_dir, cal_filename)
     video_filename = os.path.join(data_dir, vid_filename)
     output_filepath = os.path.join(curr_dir, "MARKERS")
 
     options = {
+               'USE_MINI_LIVE': False,
                'GPU': False,
                'SHOW_3D': False,
                'SAVE_MARKER_FLAG': True,
@@ -354,10 +385,6 @@ if __name__ == '__main__':
                'SAVE_3D_PCD': False
                }
 
-    if not os.path.isfile(cal_video_filename) or not os.path.isfile(video_filename) or not os.path.isfile(nnet_file):
-        print(f'Input files do not exits {cal_video_filename} or {video_filename} or {nnet_file}')
-        exit(-1)
-
-    process_marker_gel(cal_video_filename, video_filename, nnet_file, options, output_filepath)
+    process_marker_gel(video_filename, nnet_file, options, output_filepath)
 
     print('Done processing video\n')
