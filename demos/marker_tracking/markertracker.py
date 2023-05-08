@@ -17,13 +17,12 @@ class MarkerTracker:
     def __init__(self, marker_image, params=None):
 
         if params is None:
-            self.params = {'GridStyle': GridStyle.NOBORDER}
+            self.params = {'GridStyle': GridStyle.NOBORDER, 'DoPlot': False}
         else:
             self.params = params
 
         img = marker_image
 
-        doplot = False
         filtsig = 20
         bwthresh = -0.05
 
@@ -145,10 +144,10 @@ class MarkerTracker:
         self.marker_lastpos = new_centers
         self.marker_currentpos = new_centers
 
-        if doplot:
+        if params['DoPlot']:
             for i in range(len(new_centers)):
                 p = new_centers[i,:]
-                cv2.circle(img, (int(p[1]), int(p[0])), radius=int(radii[i]), color=(0, 0, 255))
+                cv2.circle(img, (int(p[1]), int(p[0])), radius=int(radii[i]), color=(0, 255, 0))
                 #cv2.add_artist(cv2.circle(p, radii[i], color='w'))
             cv2.imshow('img', cv2.resize(img, (img.shape[1] * 2, img.shape[0] * 2)))
             cv2.waitKey()
@@ -458,7 +457,7 @@ def gauss_filt(input_img, gf_img):
 if __name__ == '__main__':
     import cv2
 
-    cp = cv2.VideoCapture('data/notouch.avi')
+    cp = cv2.VideoCapture('data/mini_example.avi')
     ret, img = cp.read()
     for i in range(10):
         ret,img = cp.read()
@@ -467,7 +466,9 @@ if __name__ == '__main__':
     #cv2.imshow('img', img)
     #cv2.waitKey()
 
+    params = { 'GridStyle': GridStyle.NOBORDER, 'DoPlot': True}
+
     img = np.float32(img) / 255.0
-    mtrack = MarkerTracker(img)
+    mtrack = MarkerTracker(img, params)
 
     print(mtrack)
