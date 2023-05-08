@@ -158,7 +158,7 @@ class MarkerTracker:
             'toplot': 5,
             'meanshiftmaxitr': 3,
             'meanshiftminstep': 1,
-            'templatefactor': 5
+            'templatefactor': 1.5
         }
 
         # Calculate maximum across all three color channels
