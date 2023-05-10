@@ -144,7 +144,7 @@ class MarkerTracker:
         self.marker_lastpos = new_centers
         self.marker_currentpos = new_centers
 
-        if params['DoPlot']:
+        if self.params['DoPlot']:
             for i in range(len(new_centers)):
                 p = new_centers[i,:]
                 cv2.circle(img, (int(p[1]), int(p[0])), radius=int(radii[i]), color=(0, 255, 0))
@@ -296,7 +296,6 @@ class MarkerTracker:
         marker_mask = self.create_markermask(frame, pts, self.marker_radius)
 
         self.marker_mask = marker_mask
-
 
 
     def create_markermask(self, img, centers, radius):
