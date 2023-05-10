@@ -70,8 +70,27 @@ You may need to change the following line in show3d.py and showimages.py
 To obtain the expected results from the algorithms implemented on the raw image, please set the default camera parameters present in mini_set_cam_params.sh.
 
 ## Mini Marker Tracking
-    cd demos/mini_marker_tracking
-    python3 tracking.py
+
+There are multiple marker tracking demos.  Each uses a different marker tracking algorithm.
+You can find all of them in the demo directory.
+
+* marker_tracking:  contains demos using a mean shift algorithm and an optical flow algorithm
+
+      cd demos/marker_tracking
+      python3 mean_shift_marker_tracking.py
+              or
+      python3 optical_flow_marker_tracking.py
+
+* mini_tracking_linux_V0: contains demo using compiled code for depth first search to run on Linux, to run:
+  
+      cd demos/mini_tracking_linux_V0
+      python3 tracking.py
+
+* mini_tracking_windows_V0: contains demo using compiled code for depth first search to run on Windows, to run:
+
+      cd demos/mini_tracking_windows_V0
+      python3 tracking.py
+
 
 # Mini ROS and ROS2 
 
