@@ -347,8 +347,8 @@ class Reconstruction3D:
         if np.isnan(nz).any():
             print ('nan found')
         nz[np.where(np.isnan(nz))] = 0
-        gx = nx / nz
-        gy = ny / nz
+        gx = -nx / nz
+        gy = -ny / nz
 
         if MARKER_INTERPOLATE_FLAG:
             # gx, gy = interpolate_gradients(gx, gy, img, cm, cmmm)
