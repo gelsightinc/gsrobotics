@@ -1,4 +1,4 @@
-import sys, getopt
+import sys
 import numpy as np
 import cv2
 import os
@@ -25,66 +25,26 @@ def main(argv):
 
     rospy.init_node('showmini3dros', anonymous=True)
 
-    device = ""
-    try:
-        opts, args = getopt.getopt(argv, "hd:", ["device="])
-    except getopt.GetoptError:
-        print('python show3d.py -d <device>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('show3d.py -d <device>')
-            print('Use R1 for R1 device, and gsr15???.local for R2 device')
-            sys.exit()
-        elif opt in ("-d", "--device"):
-            device = arg
-
     # Set flags
     SAVE_VIDEO_FLAG = False
     GPU = False
     MASK_MARKERS_FLAG = True
     FIND_ROI = False
     PUBLISH_ROS_PC = True
-    SHOW_3D_NOW = False
-
+    SHOW_3D_NOW = True
     # Path to 3d model
     path = '.'
 
     # Set the camera resolution
-    # mmpp = 0.0887  # for 240x320 img size
-    mmpp = 0.081  # r2d2 gel 18x24mm at 240x320
-
-    if device == "R1":
-        finger = gsdevice.Finger.R1
-        # mmpp = 0.1778  # for 160x120 img size from R1
-        # mmpp = 0.0446  # for 640x480 img size R1
-        # mmpp = 0.029 # for 1032x772 img size from R1
-    elif device[-5:] == "local":
-        finger = gsdevice.Finger.R15
-        capturestream = "http://" + device + ":8080/?action=stream"
-    elif device == "mini":
-        finger = gsdevice.Finger.MINI
-        mmpp = 0.0625
-    else:
-        print('Unknown device name')
-        print('Use R1 for R1 device \ngsr15???.local for R1.5 device \nmini for mini device')
+    mmpp = 0.063  # mini gel 18x24mm at 240x320
 
     # This is meters per pixel that is used for ros visualization
     mpp = mmpp / 1000.
 
-    if finger == gsdevice.Finger.R1:
-        dev = gsdevice.Camera(finger, 0)
-        net_file_path = 'nnr1.pt'
-    elif finger == gsdevice.Finger.R15:
-        # cap = cv2.VideoCapture('http://gsr15demo.local:8080/?action=stream')
-        dev = gsdevice.Camera(finger, capturestream)
-        net_file_path = 'nnr15.pt'
-    elif finger == gsdevice.Finger.MINI:
-        # the device ID can change after chaning the usb ports.
-        # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
-        cam_id = gsdevice.get_camera_id("GelSight Mini")
-        dev = gsdevice.Camera(finger, cam_id)
-        net_file_path = '../nnmini.pt'
+    # the device ID can change after chaning the usb ports.
+    # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
+    dev = gsdevice.Camera("GelSight Mini")
+    net_file_path = '../nnmini.pt'
 
     dev.connect()
 
@@ -97,17 +57,17 @@ def main(argv):
         gpuorcpu = "cuda"
     else:
         gpuorcpu = "cpu"
-    if device == "R1":
-        nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R1, dev)
-    else:
-        nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R15, dev)
+
+    nn = gs3drecon.Reconstruction3D(dev)
     net = nn.load_nn(net_path, gpuorcpu)
+
+    f0 = dev.get_raw_image()
 
     if SAVE_VIDEO_FLAG:
         #### Below VideoWriter object will create a frame of above defined The output is stored in 'filename.avi' file.
         file_path = './3dnnlive.mov'
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(file_path, fourcc, 60, (160, 120), isColor=True)
+        out = cv2.VideoWriter(file_path, fourcc, 60, (f0.shape[1],f0.shape[0]), isColor=True)
 
     if PUBLISH_ROS_PC:
         ''' ros point cloud initialization '''
@@ -123,7 +83,6 @@ def main(argv):
         gelpcd.points = open3d.utility.Vector3dVector(points)
         gelpcd_pub = rospy.Publisher("/gsmini_pcd", PointCloud2, queue_size=10)
 
-    f0 = dev.get_raw_image()
     if FIND_ROI:
         roi = cv2.selectROI(f0)
         roi_cropped = f0[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
@@ -131,14 +90,6 @@ def main(argv):
         print('Press q in ROI image to continue')
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    elif f0.shape == (640, 480, 3):
-        roi = (60, 100, 375, 380)
-    elif f0.shape == (320, 240, 3):
-        roi = (30, 50, 186, 190)
-    elif f0.shape == (240, 320, 3):
-        ''' cropping is hard coded in resize_crop_mini() function in gsdevice.py file '''
-        border_size = 0  # default values set for mini to get 3d
-        roi = (border_size, border_size, 320 - 2 * border_size, 240 - 2 * border_size)  # default values set for mini to get 3d
     else:
         roi = (0, 0, f0.shape[1], f0.shape[0])
 
@@ -147,10 +98,7 @@ def main(argv):
 
     ''' use this to plot just the 3d '''
     if SHOW_3D_NOW:
-        if device == 'mini':
-            vis3d = gs3drecon.Visualize3D(dev.imgh, dev.imgw, '', mmpp)
-        else:
-            vis3d = gs3drecon.Visualize3D(dev.imgw, dev.imgh, '', mmpp)
+        vis3d = gs3drecon.Visualize3D(dev.imgh, dev.imgw, '', mmpp)
 
     try:
         rate = rospy.Rate(60)

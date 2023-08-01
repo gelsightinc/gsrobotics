@@ -17,7 +17,7 @@ if __name__ == "__main__":
         DRAW_MARKERS = False
 
     if USE_MINI_LIVE:
-        gs = gsdevice.Camera(gsdevice.Finger.MINI, 0)
+        gs = gsdevice.Camera("GelSight Mini")
         WHILE_COND = 1
         gs.connect()
     else:
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         while (WHILE_COND):
 
             if USE_MINI_LIVE:
-                curr = gs.get_raw_image()
+                curr = gs.get_image()
                 curr_gray = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
             else:
                 ret, curr = cap.read()

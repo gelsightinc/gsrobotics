@@ -1,6 +1,4 @@
-import copy
 import os
-import sys
 import time
 import numpy as np
 import cv2
@@ -84,7 +82,7 @@ def process_marker_gel(video_filename, nnet_filename, options, output_filepath='
     imgw = 320
     imgh = 240
 
-    mmpp = 10 / 140  ## for R1plus at 320x240
+    mmpp = .063  ## for Mini at 320x240
     mpp = mmpp / 1000
 
     counter = 0
@@ -156,7 +154,7 @@ def process_marker_gel(video_filename, nnet_filename, options, output_filepath='
     frame0 = None
 
     if USE_MINI_LIVE:
-        gs = gsdevice.Camera(gsdevice.Finger.MINI, 0)
+        gs = gsdevice.Camera("GelSight Mini")
         WHILE_COND = 1
         gs.connect()
     else:
@@ -228,7 +226,7 @@ def process_marker_gel(video_filename, nnet_filename, options, output_filepath='
     while (WHILE_COND):
 
         if USE_MINI_LIVE:
-            frame = gs.get_raw_image()
+            frame = gs.get_image()
             if frame.shape[1] == imgw and frame.shape[0] == imgh:
                 success = True
         else:

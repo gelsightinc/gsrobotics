@@ -4,20 +4,11 @@ import torch.nn.functional as F
 import open3d
 import numpy as np
 import math
-import enum
 import os
 import cv2
 from scipy.interpolate import griddata
 from scipy import fftpack
 
-
-
-# creating enumerations using class
-class Finger(enum.Enum):
-    R1 = 1
-    R15 = 2
-    DIGIT = 3
-    MINI = 4
 
 def find_marker(gray):
     mask = cv2.inRange(gray, 0, 70)
@@ -190,38 +181,11 @@ def poisson_dct_neumaan(gx,gy):
     return img_tt
 
 
-class RGB2NormNetR1(nn.Module):
+
+''' nn architecture for mini '''
+class RGB2NormNet(nn.Module):
     def __init__(self):
-        super(RGB2NormNetR1, self).__init__()
-        input_size = 5
-        self.fc1 = nn.Linear(input_size, 16)
-        self.fc2 = nn.Linear(16, 32)
-        self.fc3 = nn.Linear(32, 64)
-        self.fc4 = nn.Linear(64, 32)
-        self.fc5 = nn.Linear(32, 16)
-        self.fc6 = nn.Linear(16, 8)
-        self.fc7 = nn.Linear(8, 2)
-        self.drop_layer = nn.Dropout(p=0.1)
-
-    def forward(self, x):
-        x = F.tanh(self.fc1(x))
-        x = self.drop_layer(x)
-        x = F.tanh(self.fc2(x))
-        x = self.drop_layer(x)
-        x = F.tanh(self.fc3(x))
-        x = self.drop_layer(x)
-        x = F.tanh(self.fc4(x))
-        x = self.drop_layer(x)
-        x = F.tanh(self.fc5(x))
-        x = F.tanh(self.fc6(x))
-        x = self.fc7(x)
-        return x
-
-
-''' nn architecture for r1.5 and mini '''
-class RGB2NormNetR15(nn.Module):
-    def __init__(self):
-        super(RGB2NormNetR15, self).__init__()
+        super(RGB2NormNet, self).__init__()
         input_size = 5
         self.fc1 = nn.Linear(input_size, 64)
         self.fc2 = nn.Linear(64,64)
@@ -240,8 +204,7 @@ class RGB2NormNetR15(nn.Module):
         return x
 
 class Reconstruction3D:
-    def __init__(self, finger, dev):
-        self.finger = finger
+    def __init__(self, dev):
         self.cpuorgpu = "cpu"
         self.dm_zero_counter = 0
         self.dm_zero = np.zeros((dev.imgw, dev.imgh))
@@ -256,15 +219,8 @@ class Reconstruction3D:
             print('Error opening ', net_path, ' does not exist')
             return
 
-        #print('self.finger = ', self.finger)
-        if self.finger == Finger.R1:
-            print('calling nn R1...')
-            net = RGB2NormNetR1().float().to(device)
-        elif self.finger == Finger.R15:
-            print(f'calling nn with {net_path}')
-            net = RGB2NormNetR15().float().to(device)
-        else:
-            net = RGB2NormNetR15().float().to(device)
+
+        net = RGB2NormNet().float().to(device)
 
         if cpuorgpu=="cuda":
             ### load weights on gpu

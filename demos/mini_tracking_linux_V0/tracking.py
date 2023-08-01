@@ -68,7 +68,7 @@ def trim(img):
 
 def compute_tracker_gel_stats(thresh):
     numcircles = 9 * 7;
-    mmpp = .0625;
+    mmpp = .063;
     true_radius_mm = .5;
     true_radius_pixels = true_radius_mm / mmpp;
     circles = np.where(thresh)[0].shape[0]
@@ -119,15 +119,10 @@ def main(argv):
     #     if sys.argv[1] == 'calibrate':
     #         calibrate = True
 
-
-    if USE_LIVE_R1:
-        gs = GelSight(0)
-        WHILE_COND = 1
-    else:
-        cameras = find_cameras()
-        cap = cv2.VideoCapture(cameras[0])
-        # cap = cv2.VideoCapture('http://pi:robits@raspiatgelsightinc.local:8080/?action=stream')
-        WHILE_COND = cap.isOpened()
+    cameras = find_cameras()
+    cap = cv2.VideoCapture(cameras[0])
+    # cap = cv2.VideoCapture('http://pi:robits@raspiatgelsightinc.local:8080/?action=stream')
+    WHILE_COND = cap.isOpened()
 
     # set the format into MJPG in the FourCC format
     cap.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc('M','J','P','G'))
@@ -211,13 +206,9 @@ def main(argv):
     try:
         while (WHILE_COND):
 
-            if USE_LIVE_R1:
-                gs.cam.get_image(gs.img)
-                frame = gs.img.get_image_data_numpy()
-            else:
-                ret, frame = cap.read()
-                if not(ret):
-                    break
+            ret, frame = cap.read()
+            if not(ret):
+                break
 
             ##########################
             # resize (or unwarp)
@@ -313,11 +304,8 @@ def main(argv):
         print('Interrupted!')
 
     ### release the capture and other stuff
-    if USE_LIVE_R1:
-        gs.end_process()
-    else:
-        cap.release()
-        cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
     if SAVE_VIDEO_FLAG:
         out.release()
 

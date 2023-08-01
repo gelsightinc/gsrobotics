@@ -1,4 +1,3 @@
-import sys, getopt
 import numpy as np
 import cv2
 import os
@@ -24,27 +23,6 @@ class PCDPublisher(Node):
     def __init__(self):
         super().__init__('pcd_publisher_node')
 
-        device = ""
-        try:
-            opts, args = getopt.getopt(sys.argv, "hd:", ["device="])
-
-            print ('\n\n\nargs[2]:', args, '\n\n\n')
-
-        except getopt.GetoptError:
-            print('python show3d.py -d <device>')
-            sys.exit(2)
-        for opt, arg in opts:
-            if opt == '-h':
-                print('show3d.py -d <device>')
-                print('Use R1 for R1 device, and gsr15???.local for R2 device')
-                sys.exit()
-            elif opt in ("-d", "--device"):
-                device = sys.argv[1]
-
-
-        device = sys.argv[2]
-
-
         # Set flags
         SAVE_VIDEO_FLAG = False
         GPU = False
@@ -56,39 +34,13 @@ class PCDPublisher(Node):
         path = '.'
 
         # Set the camera resolution
-        # mmpp = 0.0887  # for 240x320 img size
-        # mmpp = 0.1778  # for 160x120 img size from R1
-        # mmpp = 0.0446  # for 640x480 img size R1
-        # mmpp = 0.029 # for 1032x772 img size from R1
-        mmpp = 0.081  # r2d2 gel 18x24mm at 240x320
+        mmpp = 0.063  # mini gel 18x24mm at 240x320
         self.mpp = mmpp / 1000.
 
-        print ('\n\n\n', device, '\n\n\n')
-
-        if device == "R1":
-            finger = gsdevice.Finger.R1
-        elif device[-5:] == "local":
-            finger = gsdevice.Finger.R15
-            capturestream = "http://" + device + ":8080/?action=stream"
-        elif device == "mini":
-            finger = gsdevice.Finger.MINI
-        else:
-            print('Unknown device name')
-            print('Use R1 for R1 device \ngsr15???.local for R1.5 device \nmini for mini device')
-
-        if finger == gsdevice.Finger.R1:
-            self.dev = gsdevice.Camera(finger, 0)
-            net_file_path = 'nnr1.pt'
-        elif finger == gsdevice.Finger.R15:
-            # cap = cv2.VideoCapture('http://gsr15demo.local:8080/?action=stream')
-            self.dev = gsdevice.Camera(finger, capturestream)
-            net_file_path = 'nnr15.pt'
-        elif finger == gsdevice.Finger.MINI:
-            # the device ID can change after chaning the usb ports.
-            # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
-            cam_id = gsdevice.get_camera_id("GelSight Mini")
-            self.dev = gsdevice.Camera(finger, cam_id)
-            net_file_path = '../nnmini.pt'
+        # the device ID can change after chaning the usb ports.
+        # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
+        self.dev = gsdevice.Camera("GelSight Mini")
+        net_file_path = '../nnmini.pt'
 
         self.dev.connect()
 
@@ -101,10 +53,8 @@ class PCDPublisher(Node):
             gpuorcpu = "cuda"
         else:
             gpuorcpu = "cpu"
-        if device == "R1":
-            self.nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R1, self.dev)
-        else:
-            self.nn = gs3drecon.Reconstruction3D(gs3drecon.Finger.R15, self.dev)
+
+        self.nn = gs3drecon.Reconstruction3D(self.dev)
         net = self.nn.load_nn(net_path, gpuorcpu)
 
         if SAVE_VIDEO_FLAG:
@@ -122,22 +72,11 @@ class PCDPublisher(Node):
             print('Press q in ROI image to continue')
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-        elif f0.shape == (640, 480, 3):
-            self.roi = (60, 100, 375, 380)
-        elif f0.shape == (320, 240, 3):
-            self.roi = (30, 50, 186, 190)
-        elif f0.shape == (240, 320, 3):
-            ''' cropping is hard coded in resize_crop_mini() function in gsdevice.py file '''
-            border_size = 0  # default values set for mini to get 3d
-            self.roi = (
-                border_size, border_size, 320 - 2 * border_size,
-                240 - 2 * border_size)  # default values set for mini to get 3d
         else:
             self.roi = (0, 0, f0.shape[1], f0.shape[0])
 
         print('roi = ', self.roi)
         print('press q on image to exit')
-
 
         ''' point array to store point cloud data points '''
         x = np.arange(self.dev.imgh) * self.mpp
