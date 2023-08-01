@@ -27,7 +27,7 @@ def main(argv):
 
     # the device ID can change after unplugging and changing the usb ports.
     # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
-    dev = gsdevice.Camera("Arducam USB") #("GelSight Mini")
+    dev = gsdevice.Camera("GelSight Mini")
     net_file_path = 'nnmini.pt'
 
     dev.connect()
