@@ -65,7 +65,7 @@ You can find all of them in the demo directory.
 * mini_tracking_windows_V0: contains demo using compiled code for depth first search to run on Windows, to run:
 
       cd demos/mini_tracking_windows_V0
-      python3 tracking.py
+      python3.exe tracking.py
 
 
 # Mini ROS and ROS2 
