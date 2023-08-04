@@ -84,9 +84,7 @@ def main(argv):
     imgw = 320
     imgh = 240
 
-    USE_LIVE_R1 = False
     calibrate = False
-    border_size = 25
 
     outdir = './TEST/'
     SAVE_VIDEO_FLAG = False
@@ -121,7 +119,6 @@ def main(argv):
 
     cameras = find_cameras()
     cap = cv2.VideoCapture(cameras[0])
-    # cap = cv2.VideoCapture('http://pi:robits@raspiatgelsightinc.local:8080/?action=stream')
     WHILE_COND = cap.isOpened()
 
     # set the format into MJPG in the FourCC format
@@ -129,7 +126,6 @@ def main(argv):
 
     # Resize scale for faster image processing
     setting.init()
-    RESCALE = setting.RESCALE
 
     if SAVE_VIDEO_FLAG:
         # Below VideoWriter object will create a frame of above defined The output is stored in 'filename.avi' file.
@@ -139,7 +135,6 @@ def main(argv):
         out = cv2.VideoWriter(vidfile, fourcc, 25, (imgw, imgh), isColor=True)
 
     frame0 = None
-
 
     counter = 0
     while 1:
@@ -160,7 +155,6 @@ def main(argv):
             counter += 1
 
     counter = 0
-
 
     mccopy = mc
     mc_sorted1 = mc[mc[:,0].argsort()]
@@ -218,15 +212,10 @@ def main(argv):
             frame = resize_crop_mini(frame, imgw, imgh)
             raw_img = copy.deepcopy(frame)
 
-            # frame = frame[55:,:]
-            # frame = cv2.resize(frame, (imgw, imgh))
-
-
             ''' EXTRINSIC calibration ... 
             ... the order of points [x_i,y_i] | i=[1,2,3,4], are same 
             as they appear in plt.imshow() image window. Put them in 
             clockwise order starting from the topleft corner'''
-            # frame = frame[30:400, 70:400]
             # frame = warp_perspective(frame, [[35, 15], [320, 15], [290, 360], [65, 360]], output_sz=frame.shape[:2])   # params for small dots
             # frame = warp_perspective(frame, [[180, 130], [880, 130], [800, 900], [260, 900]], output_sz=(640,480)) # org. img size (1080x1080)
 
@@ -280,7 +269,6 @@ def main(argv):
 
             bigframe = cv2.resize(frame, (frame.shape[1]*3, frame.shape[0]*3))
             cv2.imshow('frame', bigframe)
-            # cv2.moveWindow('frame', 800, 200)
             bigmask = cv2.resize(mask_img*255, (mask_img.shape[1]*3, mask_img.shape[0]*3))
             cv2.imshow('mask', bigmask)
 
@@ -294,7 +282,6 @@ def main(argv):
                 cv2.imshow('mask',mask_img*255)
             if SAVE_VIDEO_FLAG:
                 out.write(frame)
-            # print(frame.shape)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                break
 
