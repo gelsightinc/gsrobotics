@@ -99,12 +99,10 @@ class Camera:
         return self.data
 
 
-    def get_image(self, roi):
+    def get_image(self):
 
         ret, f0 = self.cam.read()
         if ret:
-            # f0 = cv2.resize(f0,(self.imgh,self.imgw))
-            # f0 = f0[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
             f0 = resize_crop_mini(f0, self.imgh, self.imgw)
         else:
             print('ERROR! reading image from camera!')
