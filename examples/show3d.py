@@ -71,7 +71,7 @@ def main(argv):
         while dev.while_condition:
 
             # get the roi image
-            f1 = dev.get_image(roi)
+            f1 = dev.get_image()
             bigframe = cv2.resize(f1, (f1.shape[1]*2, f1.shape[0]*2))
             cv2.imshow('Image', bigframe)
 

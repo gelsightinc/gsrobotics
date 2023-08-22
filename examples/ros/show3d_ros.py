@@ -29,14 +29,14 @@ def main(argv):
     SAVE_VIDEO_FLAG = False
     GPU = False
     MASK_MARKERS_FLAG = True
-    FIND_ROI = False
+    USE_ROI = False
     PUBLISH_ROS_PC = True
     SHOW_3D_NOW = True
     # Path to 3d model
     path = '.'
 
     # Set the camera resolution
-    mmpp = 0.063  # mini gel 18x24mm at 240x320
+    mmpp = 0.0634  # mini gel 18x24mm at 240x320
 
     # This is meters per pixel that is used for ros visualization
     mpp = mmpp / 1000.
@@ -83,17 +83,15 @@ def main(argv):
         gelpcd.points = open3d.utility.Vector3dVector(points)
         gelpcd_pub = rospy.Publisher("/gsmini_pcd", PointCloud2, queue_size=10)
 
-    if FIND_ROI:
+    if USE_ROI:
         roi = cv2.selectROI(f0)
         roi_cropped = f0[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
         cv2.imshow('ROI', roi_cropped)
         print('Press q in ROI image to continue')
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    else:
-        roi = (0, 0, f0.shape[1], f0.shape[0])
+        print('roi = ', roi)
 
-    print('roi = ', roi)
     print('press q on image to exit')
 
     ''' use this to plot just the 3d '''
@@ -105,7 +103,9 @@ def main(argv):
         while not rospy.is_shutdown():
 
             # get the roi image
-            f1 = dev.get_image(roi)
+            f1 = dev.get_image()
+            if USE_ROI:
+                f1 = f1[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
             bigframe = cv2.resize(f1, (f1.shape[1] * 2, f1.shape[0] * 2))
             #cv2.imshow('Image', bigframe)
 

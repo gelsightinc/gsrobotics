@@ -114,14 +114,14 @@ if __name__ == '__main__':
         for i in range(NUM_SENSORS):
             gs['img'][i] = gs['vs'][i].read()
             gs['img'][i] = cv2.resize(gs['img'][i], (imgw,imgh))
-            gs['img'][i] = chop_border_resize(gs['img'][i])
+            #gs['img'][i] = chop_border_resize(gs['img'][i])
             cv2.imshow('gsmini{}'.format(i), gs['img'][i])
 
         print ('.. hit ESC to exit! .. ')
         if cv2.waitKey(1) == 27 :
             break
 
-        ''' publish imgae to ros '''
+        ''' publish image to ros '''
         for i in range(NUM_SENSORS):
             gs['img_msg'][i] = cvbridge.cv2_to_imgmsg(gs['img'][i], encoding="passthrough")
             gs['img_msg'][i].header.stamp = rospy.Time.now()
@@ -129,7 +129,6 @@ if __name__ == '__main__':
             gs['gsmini_pub'][i].publish(gs['img_msg'][i])
 
         r.sleep()
-
 
     for i in range(NUM_SENSORS): gs['vs'][i].stop()
     cv2.destroyAllWindows()

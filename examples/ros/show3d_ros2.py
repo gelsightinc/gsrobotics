@@ -27,14 +27,14 @@ class PCDPublisher(Node):
         SAVE_VIDEO_FLAG = False
         GPU = False
         MASK_MARKERS_FLAG = True
-        FIND_ROI = False
+        USE_ROI = False
         PUBLISH_ROS_PC = True
 
         # Path to 3d model
         path = '.'
 
         # Set the camera resolution
-        mmpp = 0.063  # mini gel 18x24mm at 240x320
+        mmpp = 0.0634  # mini gel 18x24mm at 240x320
         self.mpp = mmpp / 1000.
 
         # the device ID can change after chaning the usb ports.
@@ -65,17 +65,15 @@ class PCDPublisher(Node):
 
         f0 = self.dev.get_raw_image()
 
-        if FIND_ROI:
+        if USE_ROI:
             self.roi = cv2.selectROI(f0)
             self.roi_cropped = f0[int(self.roi[1]):int(self.roi[1] + self.roi[3]), int(self.roi[0]):int(self.roi[0] + self.roi[2])]
             cv2.imshow('ROI', self.roi_cropped)
             print('Press q in ROI image to continue')
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-        else:
-            self.roi = (0, 0, f0.shape[1], f0.shape[0])
+            print('roi = ', self.roi)
 
-        print('roi = ', self.roi)
         print('press q on image to exit')
 
         ''' point array to store point cloud data points '''
@@ -101,7 +99,10 @@ class PCDPublisher(Node):
     def timer_callback(self):
 
         # get the roi image
-        f1 = self.dev.get_image(self.roi)
+        f1 = self.dev.get_image()
+        if self.USE_ROI:
+            roi = self.roi
+            f1 = f1[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
 
         # compute the depth map
         dm = self.nn.get_depthmap(f1, False)
@@ -176,7 +177,6 @@ def main(args=None):
     # when the garbage collector destroys the node object)
     pcd_publisher.destroy_node()
     rclpy.shutdown()
-
 
 
 if __name__ == "__main__":
