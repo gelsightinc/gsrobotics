@@ -56,10 +56,8 @@ if os.name == 'nt':
 
 def resize_crop_mini(img, imgw, imgh):
     # resize, crop and resize back
-    img = cv2.resize(img, (895, 672))  # size suggested by janos to maintain aspect ratio
     border_size_x, border_size_y = int(img.shape[0] * (1 / 7)), int(np.floor(img.shape[1] * (1 / 7)))  # remove 1/7th of border from each size
-    img = img[border_size_x:img.shape[0] - border_size_x, border_size_y:img.shape[1] - border_size_y]
-    img = img[:, :-1]  # remove last column to get a popular image resolution
+    img = img[border_size_x+2:img.shape[0] - border_size_x, border_size_y:img.shape[1] - border_size_y]
     img = cv2.resize(img, (imgw, imgh))  # final resize for 3d
     return img
 
