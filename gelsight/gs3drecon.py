@@ -133,8 +133,9 @@ def get_features(img,pixels,features,imgw,imgh):
 #
 def poisson_dct_neumaan(gx,gy):
 
-    gxx = 1 * (gy[(list(range(1,gx.shape[0]))+[gx.shape[0]-1]), :] - gy[([0]+list(range(gx.shape[0]-1))), :])
-    gyy = 1 * (gx[:, (list(range(1,gx.shape[1]))+[gx.shape[1]-1])] - gx[:, ([0]+list(range(gx.shape[1]-1)))])
+    gxx = 1 * (gx[:, (list(range(1, gx.shape[1])) + [gx.shape[1] - 1])] - gx[:, ([0] + list(range(gx.shape[1] - 1)))])
+    gyy = 1 * (gy[(list(range(1,gx.shape[0]))+[gx.shape[0]-1]), :] - gy[([0]+list(range(gx.shape[0]-1))), :])
+
     f = gxx + gyy
 
     ### Right hand side of the boundary condition
@@ -302,7 +303,7 @@ class Reconstruction3D:
         nz = np.sqrt(1 - nx ** 2 - ny ** 2)
         if np.isnan(nz).any():
             print ('nan found')
-        nz[np.where(np.isnan(nz))] = 0
+        nz[np.where(np.isnan(nz))] = np.nanmean(nz)
         gx = -nx / nz
         gy = -ny / nz
 
