@@ -5,15 +5,9 @@ import os
 from gelsight import gsdevice
 from gelsight import gs3drecon
 
-def get_diff_img(img1, img2):
-    return np.clip((img1.astype(int) - img2.astype(int)), 0, 255).astype(np.uint8)
-
-def get_diff_img_2(img1, img2):
-    return (img1 * 1.0 - img2) / 255.  + 0.5
 
 def main(argv):
-
-    # Set flags 
+    # Set flags
     SAVE_VIDEO_FLAG = False
     FIND_ROI = False
     GPU = False
@@ -23,7 +17,7 @@ def main(argv):
     path = '.'
 
     # Set the camera resolution
-    mmpp = 0.063  # mini gel 18x24mm at 240x320
+    mmpp = 0.0634  # mini gel 18x24mm at 240x320
 
     # the device ID can change after unplugging and changing the usb ports.
     # on linux run, v4l2-ctl --list-devices, in the terminal to get the device ID for camera
@@ -37,8 +31,10 @@ def main(argv):
     net_path = os.path.join(model_file_path, net_file_path)
     print('net path = ', net_path)
 
-    if GPU: gpuorcpu = "cuda"
-    else: gpuorcpu = "cpu"
+    if GPU:
+        gpuorcpu = "cuda"
+    else:
+        gpuorcpu = "cpu"
 
     nn = gs3drecon.Reconstruction3D(dev)
     net = nn.load_nn(net_path, gpuorcpu)
@@ -58,12 +54,12 @@ def main(argv):
         roi_cropped = f0[int(roi[1]):int(roi[1] + roi[3]), int(roi[0]):int(roi[0] + roi[2])]
         cv2.imshow('ROI', roi_cropped)
         print('Press q in ROI image to continue')
-        cv2.waitKey(0) 
+        cv2.waitKey(0)
         cv2.destroyAllWindows()
 
     print('roi = ', roi)
     print('press q on image to exit')
-    
+
     ''' use this to plot just the 3d '''
     vis3d = gs3drecon.Visualize3D(dev.imgh, dev.imgw, '', mmpp)
 
@@ -72,7 +68,7 @@ def main(argv):
 
             # get the roi image
             f1 = dev.get_image()
-            bigframe = cv2.resize(f1, (f1.shape[1]*2, f1.shape[0]*2))
+            bigframe = cv2.resize(f1, (f1.shape[1] * 2, f1.shape[0] * 2))
             cv2.imshow('Image', bigframe)
 
             # compute the depth map
@@ -87,8 +83,9 @@ def main(argv):
                 out.write(f1)
 
     except KeyboardInterrupt:
-            print('Interrupted!')
-            dev.stop_video()
+        print('Interrupted!')
+        dev.stop_video()
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
