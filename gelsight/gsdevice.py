@@ -81,8 +81,6 @@ class Camera:
         self.cam = cv2.VideoCapture(self.dev_id)
         if self.cam is None or not self.cam.isOpened():
             print('Warning: unable to open video source: ', self.dev_id)
-        self.imgw = 240
-        self.imgh = 320
 
         return self.cam
 
@@ -91,7 +89,7 @@ class Camera:
             ret, f0 = self.cam.read()
         ret, f0 = self.cam.read()
         if ret:
-            f0 = resize_crop_mini(f0,self.imgh,self.imgw)
+            f0 = resize_crop_mini(f0,self.imgw,self.imgh)
         else:
             print('ERROR! reading image from camera')
 
@@ -103,7 +101,7 @@ class Camera:
 
         ret, f0 = self.cam.read()
         if ret:
-            f0 = resize_crop_mini(f0, self.imgh, self.imgw)
+            f0 = resize_crop_mini(f0, self.imgw, self.imgh)
         else:
             print('ERROR! reading image from camera!')
 
