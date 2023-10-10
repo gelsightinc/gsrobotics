@@ -4,6 +4,8 @@
 This respository contains python code to connect to the GelSight Mini. The code enables basic functionalities, such as
 view and save data (images or video) from these devices, and example code to get 3D point cloud data derived from 2D images.
 
+About to update instructions
+
 ## Prerequisites
 
     Python 3.8 or above
