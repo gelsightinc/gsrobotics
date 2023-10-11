@@ -28,7 +28,7 @@ On Windows, we recommend running the examples within the PyCharm development env
        <img src="/docs/images/git-clone.png" alt="TortoiseGit menu" height="400px">
            </td> 
            <td>
-               <img src="https://github.com/gelsightinc/gsrobotics/blob/main/docs/images/show-more-options.png" alt="Windows 11 contextual menu" height="400px">
+               <img src="/docs/images/show-more-options.png" alt="Windows 11 contextual menu" height="400px">
            </td></tr>
            <tr><td>Git Clone using TortoiseGit</td>
            <td>Need to click Show More Options on Windows 11</td></tr>
@@ -46,7 +46,24 @@ On Windows, we recommend running the examples within the PyCharm development env
 
 #### Configuring PyCharm
 1. Launch PyCharm and Open the gsrobotics folder you cloned following the instructions above. Choose **Trust Project** when prompted.
-1. 
+1. The first time you open the gsrobotics folder, PyCharm will prompt you to create the virtual environment. This will automatically install the packages listed in the requirements.txt file. Click **OK** to create the environment.
+          <table>
+           <tr><td>
+       <img src="/docs/images/create-virtual-environment.png" alt="TortoiseGit settings" height="400px">
+           </td> 
+           </tr>
+           <tr><td>Create the virutal environment in PyCharm</td>
+        </tr>
+       </table>
+1. From the file navigator on the left, open the script **showimages.py** in the examples folder. Right-click in the file editor and choose **Run 'showimages'**.
+          <table>
+           <tr><td>
+       <img src="/docs/images/run-showimages.png" alt="TortoiseGit settings" height="400px">
+           </td> 
+           </tr>
+           <tr><td>Run showimages.py in PyCharm</td>
+        </tr>
+       </table>
 
 ### Linux
 
