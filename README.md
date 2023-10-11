@@ -45,11 +45,12 @@ On Windows, we recommend running the examples within the PyCharm development env
 
 
 #### Configuring PyCharm
+1. Plug in the GelSight Mini device to a USB port on your computer. The lights should turn on.
 1. Launch PyCharm and Open the gsrobotics folder you cloned following the instructions above. Choose **Trust Project** when prompted.
 1. The first time you open the gsrobotics folder, PyCharm will prompt you to create the virtual environment. This will automatically install the packages listed in the requirements.txt file. Click **OK** to create the environment.
           <table>
            <tr><td>
-       <img src="/docs/images/create-virtual-environment.png" alt="TortoiseGit settings" height="400px">
+       <img src="/docs/images/create-virtual-environment.png" alt="TortoiseGit settings" height="200px">
            </td> 
            </tr>
            <tr><td>Create the virutal environment in PyCharm</td>
@@ -64,6 +65,26 @@ On Windows, we recommend running the examples within the PyCharm development env
            <tr><td>Run showimages.py in PyCharm</td>
         </tr>
        </table>
+1. You should see a window with a live view from the camera in the GelSight Mini. Press the Mini into an object to see a live tactile image.
+1. Congratulations, you are now able to program your GelSight Mini!
+
+#### Live 3D Demo
+1. These instructions assume you have successfully installed Python, PyCharm and run the **showimages.py** demo above.
+1. Open the **show3d.py** script
+1. Right-click in the file editor and choose **Run 'show3d'**. 
+          <table>
+           <tr><td>
+    <video>
+    <source src="/docs/videos/show3d-demo.mp4" type="video/mp4" >
+    Sorry your browser doesn't support embedded videos.
+    </video>
+           </td> 
+           </tr>
+           <tr><td>Live 3D Demo</td>
+        </tr>
+       </table>
+1. Congratulations, you are now able to run the 3D demo using GelSight Mini!
+
 
 ### Linux
 
