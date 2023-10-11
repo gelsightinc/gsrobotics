@@ -1,12 +1,30 @@
 # SDK for GelSight robotic sensors
 
 
-This respository contains python code to connect to the GelSight Mini. The code enables basic functionalities, such as
-view and save data (images or video) from these devices, and example code to get 3D point cloud data derived from 2D images.
+This respository contains python code to connect to the GelSight Mini. The code enables basic functionalities, such as view and save data (images or video) from these devices, and example code to get 3D point cloud data derived from 2D images.
 
 About to update instructions
 
 ## Prerequisites
+
+### Windows
+
+On Windows, we recommend running the examples within the PyCharm development environment. Here are instructions on how to set up PyCharm. 
+
+1. Download and install **[Git for Windows](https://gitforwindows.org/)**
+1. Download and install **[TortoiseGit](https://tortoisegit.org/)**
+1. Download and install **[Python 3.11](https://www.python.org/downloads/release/python-3116/)**
+    For most users, the correct version is **Windows installer (64-bit)**
+1. Go to **[PyCharm](https://www.jetbrains.com/pycharm/download/?section=windows)** and download the PyCharm Community installer
+
+1. Clone this repository
+    1. On this page, click the green code button at the top and copy the repository URL
+    2. In Windows Explorer, right-click on a folder and choose Git Clone...  On Windows 11, you will have to choose "Show More Options"
+    3. Clone the repository to a folder on your local machine. 
+
+
+
+### Linux
 
     Python 3.8 or above
 
@@ -26,6 +44,16 @@ libraries required by the python scripts in examples/ros folder of this reposito
 
 
 # GelSight Mini
+
+Open gsrobotics in PyCharm
+
+Install requirements
+
+Install opencv-python
+Install open3d-python
+
+Add a requirement for opencv-python Install package
+
 
 
 ## Windows setup
