@@ -15,7 +15,7 @@ On Windows, we recommend running the examples within the PyCharm development env
 
 1. Download and install **[Git for Windows](https://gitforwindows.org/)**
 1. Download and install **[TortoiseGit](https://tortoisegit.org/)**. For most users, the correct version is 64-bit Windows. Run the First Start wizard after installation and choose the default options.
-1. Download and install **[Python 3.11](https://www.python.org/downloads/release/python-3116/)**
+1. Download and install **[Python 3.10](https://www.python.org/downloads/release/python-31011/)**. More recent versions of Python might require additional steps to install the packages used by this codebase. 
     For most users, the correct version is **Windows installer (64-bit)**
 1. Go to **[PyCharm](https://www.jetbrains.com/pycharm/download/?section=windows)** and download the PyCharm Community installer
 
@@ -45,6 +45,8 @@ On Windows, we recommend running the examples within the PyCharm development env
 
 
 #### Configuring PyCharm
+1. Launch PyCharm and Open the gsrobotics folder you cloned following the instructions above. Choose **Trust Project** when prompted.
+1. 
 
 ### Linux
 
