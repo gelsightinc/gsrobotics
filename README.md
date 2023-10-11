@@ -100,37 +100,9 @@ libraries required by the python scripts in examples/ros folder of this reposito
     export PYTHONPATH=$PYDIR/gelsight:$PYTHONPATH
 
 
-# GelSight Mini
-
-Open gsrobotics in PyCharm
-
-Install requirements
-
-Install opencv-python
-Install open3d-python
-
-Add a requirement for opencv-python Install package
+# More Examples
 
 
-
-## Windows setup
-
-The script tries to find the correct camera device id on Windows.
-You may need to change the following line in show3d.py and showimages.py
-
-    dev = gsdevice.Camera("GelSight Mini")
-
-
-## View raw 2D image
-    cd examples
-    python3 showimages.py
-
-
-## View 3d point cloud data
-    cd examples
-    python3 show3d.py
-
-To obtain the expected results from the algorithms implemented on the raw image, please set the default camera parameters present in mini_set_cam_params.sh.
 
 ## Mini Marker Tracking
 
