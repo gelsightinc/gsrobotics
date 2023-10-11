@@ -9,17 +9,19 @@ About to update instructions
 
 ### Windows
 
+#### Cloning the repository
+
 On Windows, we recommend running the examples within the PyCharm development environment. Here are instructions on how to set up PyCharm. 
 
 1. Download and install **[Git for Windows](https://gitforwindows.org/)**
-1. Download and install **[TortoiseGit](https://tortoisegit.org/)**
+1. Download and install **[TortoiseGit](https://tortoisegit.org/)**. For most users, the correct version is 64-bit Windows. Run the First Start wizard after installation and choose the default options.
 1. Download and install **[Python 3.11](https://www.python.org/downloads/release/python-3116/)**
     For most users, the correct version is **Windows installer (64-bit)**
 1. Go to **[PyCharm](https://www.jetbrains.com/pycharm/download/?section=windows)** and download the PyCharm Community installer
 
 1. Clone this repository
     1. Navigate to a folder on your machine where you would like to clone the repository
-    2. On this page, click the green code button at the top and copy the repository URL
+    2. On this page, click the green **Code** button at the top and copy the repository URL
     3. In Windows Explorer, right-click in the folder and choose Git Clone...  On Windows 11, you will have to choose "Show More Options"
        <table>
            <tr><td>
@@ -42,6 +44,7 @@ On Windows, we recommend running the examples within the PyCharm development env
        </table>
 
 
+#### Configuring PyCharm
 
 ### Linux
 
