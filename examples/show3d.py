@@ -2,8 +2,8 @@ import sys
 import numpy as np
 import cv2
 import os
-from gelsight import gsdevice
-from gelsight import gs3drecon
+import gsdevice
+import gs3drecon
 
 
 def main(argv):
