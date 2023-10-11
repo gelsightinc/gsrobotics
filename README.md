@@ -18,8 +18,9 @@ On Windows, we recommend running the examples within the PyCharm development env
 1. Go to **[PyCharm](https://www.jetbrains.com/pycharm/download/?section=windows)** and download the PyCharm Community installer
 
 1. Clone this repository
-    1. On this page, click the green code button at the top and copy the repository URL
-    2. In Windows Explorer, right-click on a folder and choose Git Clone...  On Windows 11, you will have to choose "Show More Options"
+    1. Navigate to a folder on your machine where you would like to clone the repository
+    2. On this page, click the green code button at the top and copy the repository URL
+    3. In Windows Explorer, right-click in the folder and choose Git Clone...  On Windows 11, you will have to choose "Show More Options"
        <table>
            <tr><td>
        <img src="/docs/images/git-clone.png" alt="TortoiseGit menu" height="400px">
@@ -30,7 +31,15 @@ On Windows, we recommend running the examples within the PyCharm development env
            <tr><td>Git Clone using TortoiseGit</td>
            <td>Need to click Show More Options on Windows 11</td></tr>
        </table>
-    4. Clone the repository to a folder on your local machine. 
+    4. Clone the repository to a folder on your local machine
+       <table>
+           <tr><td>
+       <img src="/docs/images/git-clone-paths.png" alt="TortoiseGit settings" height="400px">
+           </td> 
+           </tr>
+           <tr><td>Clone repository using TortoiseGit</td>
+        </tr>
+       </table>
 
 
 
