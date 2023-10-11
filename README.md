@@ -21,7 +21,7 @@ On Windows, we recommend running the examples within the PyCharm development env
 
 1. Clone this repository
     1. Navigate to a folder on your machine where you would like to clone the repository
-    2. On this page, click the green **Code** button at the top and copy the repository URL
+    2. On this page, click the green **Code** button at the top and copy the repository URL by clicking the button to the right of the URL.
     3. In Windows Explorer, right-click in the folder and choose Git Clone...  On Windows 11, you will have to choose "Show More Options"
        <table>
            <tr><td>
