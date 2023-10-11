@@ -28,7 +28,7 @@ On Windows, we recommend running the examples within the PyCharm development env
        <img src="/docs/images/git-clone.png" alt="TortoiseGit menu" height="400px">
            </td> 
            <td>
-               <img src="/docs/images/show-more-options.png" alt="Windows 11 contextual menu" height="400px">
+               <img src="https://github.com/gelsightinc/gsrobotics/blob/main/docs/images/show-more-options.png" alt="Windows 11 contextual menu" height="400px">
            </td></tr>
            <tr><td>Git Clone using TortoiseGit</td>
            <td>Need to click Show More Options on Windows 11</td></tr>
