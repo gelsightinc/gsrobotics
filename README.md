@@ -72,17 +72,12 @@ On Windows, we recommend running the examples within the PyCharm development env
 1. These instructions assume you have successfully installed Python, PyCharm and run the **showimages.py** demo above.
 1. Open the **show3d.py** script
 1. Right-click in the file editor and choose **Run 'show3d'**. 
-          <table>
-           <tr><td>
-    <video>
-    <source src="/docs/videos/show3d-demo.mp4" type="video/mp4" >
-    Sorry your browser doesn't support embedded videos.
-    </video>
-           </td> 
-           </tr>
-           <tr><td>Live 3D Demo</td>
-        </tr>
-       </table>
+
+
+https://github.com/gelsightinc/gsrobotics/assets/44114954/85b3e123-730d-4dfa-a05a-983dfc1e5a78
+
+
+
 1. Congratulations, you are now able to run the 3D demo using GelSight Mini!
 
 
