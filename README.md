@@ -209,6 +209,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 
 # Contact
-This package is under active development. Contact debra_shure@gelsight.com if have any questions / comments / suggestions.
+This package is under active development. Contact support@gelsight.com if have any questions / comments / suggestions.
 
 
