@@ -2,8 +2,7 @@ cff-version: 1.2.0
 abstract: "This repository is for use with the GelSight Mini tactile sensor." 
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: Shure
-  given-names: Debra
+- family-names: GelSight, Inc.
 title: "GelSight Robotics Software"
 version: 4.0
 date-released: 2021-11-03
