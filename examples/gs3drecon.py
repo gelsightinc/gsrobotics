@@ -1,7 +1,7 @@
+import open3d
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import open3d
 import numpy as np
 import math
 import os
@@ -206,15 +206,24 @@ class RGB2NormNet(nn.Module):
 
 class Reconstruction3D:
     def __init__(self, dev):
-        self.cpuorgpu = "cpu"
+        self.device_type = "cpu"
         self.dm_zero_counter = 0
         self.dm_zero = np.zeros((dev.imgw, dev.imgh))
         pass
 
-    def load_nn(self, net_path, cpuorgpu):
+    def load_nn(self, net_path, device_type=None):
+        
+        # Automatically select device if not provided
+        if device_type is None:
+            if torch.cuda.is_available():
+                device_type = 'cuda'
+            elif torch.backends.mps.is_available():
+                device_type = 'mps'
+            else:
+                device_type = 'cpu'
 
-        self.cpuorgpu = cpuorgpu
-        device = torch.device(cpuorgpu)
+        self.device_type = device_type
+        device = torch.device(device_type)
 
         if not os.path.isfile(net_path):
             print('Error opening ', net_path, ' does not exist')
@@ -223,10 +232,14 @@ class Reconstruction3D:
 
         net = RGB2NormNet().float().to(device)
 
-        if cpuorgpu=="cuda":
+        if device_type=="cuda":
             ### load weights on gpu
             # net.load_state_dict(torch.load(net_path))
             checkpoint = torch.load(net_path, map_location=lambda storage, loc: storage.cuda(0))
+            net.load_state_dict(checkpoint['state_dict'])
+        elif device_type == "mps" :
+            ### load weights on mac m seriel
+            checkpoint = torch.load(net_path, map_location=lambda storage, loc: storage.mps())
             net.load_state_dict(checkpoint['state_dict'])
         else:
             ### load weights on cpu which were actually trained on gpu
@@ -281,7 +294,7 @@ class Reconstruction3D:
         # pxpos[:, 1] = pxpos[:, 1] / ((240 / imgw) * imgw)
 
         features = np.column_stack((rgb, pxpos))
-        features = torch.from_numpy(features).float().to(self.cpuorgpu)
+        features = torch.from_numpy(features).float().to(self.device_type)
         with torch.no_grad():
             self.net.eval()
             out = self.net(features)
