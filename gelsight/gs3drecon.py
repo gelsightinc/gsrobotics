@@ -1,7 +1,7 @@
+import open3d
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import open3d
 import numpy as np
 import math
 import os
