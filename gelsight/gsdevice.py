@@ -35,7 +35,9 @@ def get_camera_id(camera_name):
             else:
                 found = "      "
             print("{} {} -> {}".format(found, file, name))
-
+    if cam_num is None:
+        print("ERROR! Can't Found Camera Device")
+        exit()
     return cam_num
 
 if os.name == 'nt':
