@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import platform
 import os
 import re
 
@@ -17,7 +18,7 @@ def get_camera_id(camera_name):
     cam_num = None
     if os.name == 'nt':
         cam_num = find_cameras_windows(camera_name)
-    elif os.name == "posix":
+    elif platform.system() == "Darwin":
         import usb.core
         devices = usb.core.find(find_all=True)
         for idx, device in enumerate(devices):
