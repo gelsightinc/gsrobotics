@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import platform
 import os
 import re
 
@@ -17,6 +18,13 @@ def get_camera_id(camera_name):
     cam_num = None
     if os.name == 'nt':
         cam_num = find_cameras_windows(camera_name)
+    elif platform.system() == "Darwin":
+        import usb.core
+        devices = usb.core.find(find_all=True)
+        for idx, device in enumerate(devices):
+            if camera_name in device.product:
+                cam_num = idx
+                break
     else:
         for file in os.listdir("/sys/class/video4linux"):
             real_file = os.path.realpath("/sys/class/video4linux/" + file + "/name")
@@ -28,7 +36,9 @@ def get_camera_id(camera_name):
             else:
                 found = "      "
             print("{} {} -> {}".format(found, file, name))
-
+    if cam_num is None:
+        print("ERROR! Can't Found Camera Device")
+        exit()
     return cam_num
 
 if os.name == 'nt':
