@@ -185,6 +185,34 @@ class GridFlowTracker:
         
         return heatmap
         
+    def find_contact_area(self, depth_map):
+        """Find contact area from depth map and fit ellipse"""
+        # Threshold the depth map to find contact regions
+        # Use Otsu's method to find the threshold automatically
+        depth_norm = cv2.normalize(depth_map, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        _, contact_mask = cv2.threshold(depth_norm, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        
+        # Clean up the mask with morphological operations
+        kernel = np.ones((2,2), np.uint8)
+        #contact_mask = cv2.morphologyEx(contact_mask, cv2.MORPH_CLOSE, kernel)
+        #contact_mask = cv2.morphologyEx(contact_mask, cv2.MORPH_OPEN, kernel)
+        
+        # Find contours in the mask
+        contours, _ = cv2.findContours(contact_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        if not contours:
+            return None, None
+            
+        # Find the largest contour
+        largest_contour = max(contours, key=cv2.contourArea)
+        
+        # Fit an ellipse to the contour if it has enough points
+        if len(largest_contour) >= 5:
+            ellipse = cv2.fitEllipse(largest_contour)
+            return largest_contour, ellipse
+        
+        return largest_contour, None
+        
     def visualize(self, frame):
         """Visualize tracking results on frame"""
         vis_frame = frame.copy()
@@ -208,21 +236,54 @@ class GridFlowTracker:
                         # Draw marker at current position
                         cv2.circle(vis_frame, (end_x,end_y), 3, (255,0,0), -1)
         
-        # Create depth visualization
-        """ depth_vis = cv2.normalize(self.depth_map, None, 0, 255, cv2.NORM_MINMAX)
-        depth_vis = cv2.applyColorMap(depth_vis.astype(np.uint8), cv2.COLORMAP_JET)
+        # Find and draw contact area
+        contour, ellipse = self.find_contact_area(self.depth_map)
+        if contour is not None:
+            pass
+            # Draw the contour
+            #cv2.drawContours(vis_frame, [contour], -1, (0,255,0), 2)
+            
+            if ellipse is not None:
+                # Draw the ellipse
+                center, axes, angle = ellipse
+                center = tuple(map(int, center))
+                axes = tuple(map(int, axes))
+                cv2.ellipse(vis_frame, center, axes, angle, 0, 360, (255,255,0), 2)
+                
+                # Draw major and minor axes
+                major_angle = np.deg2rad(angle)
+                minor_angle = major_angle + np.pi/2
+                
+                # Major axis
+                major_dx = np.cos(major_angle) * axes[0]
+                major_dy = np.sin(major_angle) * axes[0]
+                pt1 = (int(center[0] - major_dx), int(center[1] - major_dy))
+                pt2 = (int(center[0] + major_dx), int(center[1] + major_dy))
+                cv2.line(vis_frame, pt1, pt2, (0,255,255), 2)
+                
+                # Minor axis
+                minor_dx = np.cos(minor_angle) * axes[1]
+                minor_dy = np.sin(minor_angle) * axes[1]
+                pt1 = (int(center[0] - minor_dx), int(center[1] - minor_dy))
+                pt2 = (int(center[0] + minor_dx), int(center[1] + minor_dy))
+                cv2.line(vis_frame, pt1, pt2, (0,255,255), 2)
+                
+                # Add text with measurements
+                major_axis_mm = axes[0] * self.mmpp * 2  # Convert to mm
+                minor_axis_mm = axes[1] * self.mmpp * 2  # Convert to mm
+                area_mm2 = np.pi * major_axis_mm * minor_axis_mm / 4  # Ellipse area
+                
+                cv2.putText(vis_frame, f'Major: {major_axis_mm:.1f}mm', 
+                          (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
+                cv2.putText(vis_frame, f'Minor: {minor_axis_mm:.1f}mm', 
+                          (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
+                cv2.putText(vis_frame, f'Area: {area_mm2:.1f}mm2', 
+                          (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
         
-        # Resize visualizations to match
-        vis_frame = cv2.resize(vis_frame, (self.imgw*2, self.imgh*2))
-        depth_vis = cv2.resize(depth_vis, (self.imgw*2, self.imgh*2)) """
-
-               # Update 3D visualization
+        # Update 3D visualization
         self.vis3d.update(self.depth_map)
         
-        # Combine visualizations side by side
-        combined = vis_frame#np.hstack((vis_frame, depth_vis))
-        
-        return combined
+        return vis_frame
 
 def main():
     # Initialize parameters
@@ -274,7 +335,7 @@ def main():
             #    cv2.imshow('Vector Field Heatmap', cv2.resize(heatmap, (2*heatmap.shape[1], 2*heatmap.shape[0])))
             
             # Show results
-            cv2.imshow('Grid Flow Tracking', cv2.resize(vis_frame, (vis_frame.shape[1], vis_frame.shape[0])))
+            cv2.imshow('Grid Flow Tracking', vis_frame)
             
             # Handle keypresses
             key = cv2.waitKey(1) & 0xFF
