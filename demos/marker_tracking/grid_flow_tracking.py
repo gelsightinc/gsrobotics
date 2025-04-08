@@ -14,6 +14,7 @@ class GridFlowTracker:
         self.marker_tracker = None
         self.grid_vectors = None
         self.grid_centers = None
+        self.initial_positions = None
         
     def initialize(self, frame):
         """Initialize the tracker with a base frame"""
@@ -26,6 +27,7 @@ class GridFlowTracker:
         # Store initial marker positions
         self.base_frame = frame.copy()
         self.marker_centers = self.marker_tracker.initial_marker_center
+        self.initial_positions = self.marker_centers.copy()
         
         # Create grid structure
         self._create_grid()
@@ -35,8 +37,8 @@ class GridFlowTracker:
         # Get marker centers
         centers = self.marker_centers
         
-        # Sort centers by y then x coordinates
-        sorted_indices = np.lexsort((centers[:, 1], centers[:, 0]))
+        # Sort centers by x then y coordinates (OpenCV coordinate system)
+        sorted_indices = np.lexsort((centers[:, 0], centers[:, 1]))
         sorted_centers = centers[sorted_indices]
         
         # Reshape into grid
@@ -64,9 +66,11 @@ class GridFlowTracker:
         # Calculate flow vectors for each grid cell
         for i in range(self.grid_centers.shape[0]):
             for j in range(self.grid_centers.shape[1]):
-                base_pos = self.grid_centers[i,j]
-                curr_pos = current_pos[i*self.grid_size + j]
-                self.grid_vectors[i,j] = curr_pos - base_pos
+                idx = i * self.grid_size + j
+                if idx < len(current_pos):
+                    # Calculate displacement from initial position
+                    displacement = current_pos[idx] - self.initial_positions[idx]
+                    self.grid_vectors[i,j] = displacement
                 
     def visualize(self, frame):
         """Visualize tracking results on frame"""
@@ -75,21 +79,37 @@ class GridFlowTracker:
         # Draw grid lines
         for i in range(self.grid_centers.shape[0]):
             for j in range(self.grid_centers.shape[1]):
+                # Convert coordinates to OpenCV format (x,y)
+                center = self.grid_centers[i,j]
+                x, y = int(center[1]), int(center[0])  # Swap x and y for OpenCV
+                
                 # Draw grid cell
                 if j < self.grid_centers.shape[1]-1:
-                    pt1 = tuple(self.grid_centers[i,j].astype(int))
-                    pt2 = tuple(self.grid_centers[i,j+1].astype(int))
-                    cv2.line(vis_frame, pt1, pt2, (0,255,0), 1)
+                    next_center = self.grid_centers[i,j+1]
+                    next_x, next_y = int(next_center[1]), int(next_center[0])
+                    #cv2.line(vis_frame, (x,y), (next_x,next_y), (0,255,0), 1)
                 if i < self.grid_centers.shape[0]-1:
-                    pt1 = tuple(self.grid_centers[i,j].astype(int))
-                    pt2 = tuple(self.grid_centers[i+1,j].astype(int))
-                    cv2.line(vis_frame, pt1, pt2, (0,255,0), 1)
+                    next_center = self.grid_centers[i+1,j]
+                    next_x, next_y = int(next_center[1]), int(next_center[0])
+                    #cv2.line(vis_frame, (x,y), (next_x,next_y), (0,255,0), 1)
                     
                 # Draw flow vectors
                 if self.grid_vectors is not None:
-                    start = tuple(self.grid_centers[i,j].astype(int))
-                    end = tuple((self.grid_centers[i,j] + self.grid_vectors[i,j]).astype(int))
-                    cv2.arrowedLine(vis_frame, start, end, (0,0,255), 2, tipLength=0.2)
+                    # Get the current position of the marker
+                    idx = i * self.grid_size + j
+                    if idx < len(self.marker_tracker.marker_currentpos):
+                        current_pos = self.marker_tracker.marker_currentpos[idx]
+                        # Convert coordinates to OpenCV format
+                        start_x, start_y = int(self.initial_positions[idx][1]), int(self.initial_positions[idx][0])
+                        end_x, end_y = int(current_pos[1]), int(current_pos[0])
+                        
+                        # Only draw if there's significant movement
+                        if np.linalg.norm(self.grid_vectors[i,j]) > 1.0:
+                            # Draw the vector
+                            cv2.arrowedLine(vis_frame, (start_x,start_y), (end_x,end_y), (0,0,255), 2, tipLength=0.2)
+                            
+                            # Draw marker at current position
+                            cv2.circle(vis_frame, (end_x,end_y), 3, (255,0,0), -1)
                     
         return vis_frame
 
