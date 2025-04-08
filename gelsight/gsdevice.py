@@ -74,6 +74,8 @@ class Camera:
         self.imgh = 240 # this is for R1, R1.5 is 320
         self.cam = None
         self.while_condition = 1
+        # print 'Creating camera: ' + dev_id
+        print(f'Creating camera: {self.dev_id}')
 
     def connect(self):
 
