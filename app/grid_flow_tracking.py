@@ -15,6 +15,35 @@ def find_marker(gray):
     mask = cv2.inRange(gray, 0, 70)
     return mask
 
+CONTROL_WINDOW = "Mouse Controls" # Window name for trackbars
+
+# Global tracker object to be accessed by callbacks
+# This is a simple way for callbacks to access the tracker instance.
+# Consider a more robust approach (e.g., classes) for larger applications.
+global_tracker = None
+
+# --- Trackbar Callback Functions --- 
+def on_scale_change(val):
+    if global_tracker:
+        global_tracker.mouse_controller.scaling_factor = float(val)
+
+def on_threshold_change(val):
+    # Scale integer trackbar (0-100) to float threshold (0.0 - 0.100)
+    if global_tracker:
+        global_tracker.mouse_controller.min_threshold = float(val) / 1000.0
+
+def on_speed_change(val):
+    if global_tracker:
+        # Ensure minimum speed is reasonable, e.g., 100
+        global_tracker.mouse_controller.max_speed = max(100, int(val))
+
+def on_smooth_change(val):
+    # Scale integer trackbar (1-99) to float smoothing (0.01 - 0.99)
+    if global_tracker:
+        # Ensure smoothing factor is not zero to avoid freezing
+        global_tracker.mouse_controller.smoothing_factor = max(0.01, float(val) / 100.0)
+# --- End Trackbar Callbacks ---
+
 class GridFlowTracker:
     def __init__(self, dev, imgw=320, imgh=240):
         self.dev = dev
@@ -30,6 +59,12 @@ class GridFlowTracker:
         self.mmpp = 0.0634  # mm per pixel for GelSight Mini
         self.dm_zero = np.zeros((imgh, imgw))  # Note: height first, then width
         self.dm_zero_counter = 0
+        self.mouse_controller = MouseController() 
+        self.mouse_control_enabled = False # Start disabled
+        self.last_contact_mask = None # To store the mask for mouse control
+        self.last_contour = None
+        self.last_ellipse = None
+        self.grid_centers = None # Ensure this is initialized
 
         # Path to 3d model
         path = '.'
@@ -385,6 +420,7 @@ class GridFlowTracker:
             self.mouse_controller.smoothed_dy = 0.0
 
 def main():
+    global global_tracker # Allow main to modify the global tracker reference
     # Initialize parameters
     imgw = 320
     imgh = 240
@@ -399,6 +435,7 @@ def main():
         
     # Initialize tracker
     tracker = GridFlowTracker(gs, imgw, imgh)
+    global_tracker = tracker # Assign the created tracker instance
     
     # Get initial frame
     if USE_MINI_LIVE:
@@ -412,6 +449,25 @@ def main():
     # Initialize tracker with first frame
     tracker.initialize(frame)
     
+    # --- Create Control Window and Trackbars --- 
+    cv2.namedWindow(CONTROL_WINDOW)
+    
+    # Initial values from the controller
+    init_scale = int(tracker.mouse_controller.scaling_factor)
+    init_thresh = int(tracker.mouse_controller.min_threshold * 1000) # Scale to 0-100 range for trackbar
+    init_speed = int(tracker.mouse_controller.max_speed)
+    init_smooth = int(tracker.mouse_controller.smoothing_factor * 100) # Scale to 1-99 range
+
+    cv2.createTrackbar("Scale", CONTROL_WINDOW, init_scale, 500, on_scale_change)
+    cv2.createTrackbar("Threshold (/1k)", CONTROL_WINDOW, init_thresh, 100, on_threshold_change) 
+    cv2.createTrackbar("Max Speed", CONTROL_WINDOW, init_speed, 5000, on_speed_change)
+    cv2.createTrackbar("Smoothing (/100)", CONTROL_WINDOW, init_smooth, 99, on_smooth_change)
+    # Set minimum for smoothing trackbar to 1 (representing 0.01)
+    cv2.setTrackbarMin("Smoothing (/100)", CONTROL_WINDOW, 1)
+    # Set minimum for max speed
+    cv2.setTrackbarMin("Max Speed", CONTROL_WINDOW, 100)
+    # --- End Trackbar Setup ---
+
     try:
         while True:
             # Get new frame

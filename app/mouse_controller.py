@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 class MouseController:
-    def __init__(self, scaling_factor=150.0, min_threshold=0.05, max_speed=2000, smoothing_factor=0.5):
+    def __init__(self, scaling_factor=100.0, min_threshold=0.05, max_speed=2000, smoothing_factor=0.7):
         """
         Initialize mouse controller
         
