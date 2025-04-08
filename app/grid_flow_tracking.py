@@ -8,6 +8,7 @@ from scipy.interpolate import griddata
 from gs_utils import poisson_dct_neumaan, demark, Visualize3D
 from gs3drecon import Reconstruction3D
 import os
+from mouse_controller import MouseController
 
 def find_marker(gray):
     """Find marker mask from grayscale image"""
@@ -59,6 +60,11 @@ class GridFlowTracker:
         print(f"Image dimensions in pixels: {self.imgh}x{self.imgw}")
         print(f"Image dimensions in mm: {self.imgh * self.mmpp:.1f}x{self.imgw * self.mmpp:.1f}")
         
+        # Initialize mouse controller
+        self.mouse_controller = MouseController() 
+        self.mouse_control_enabled = False # Start disabled
+        self.last_contact_mask = None # To store the mask for mouse control
+
     def initialize(self, frame):
         """Initialize the tracker with a base frame"""
         # Convert frame to float32 for processing
@@ -77,9 +83,11 @@ class GridFlowTracker:
         
         # Initialize 3D visualization
         self.vis3d = Visualize3D(self.imgw, self.imgh, self.mmpp, '')
-
         
-    
+        # Reset depth map zero reference
+        self.dm_zero = np.zeros((self.imgh, self.imgw))
+        self.dm_zero_counter = 0
+
     def _create_grid(self):
         """Create 7x9 grid structure from detected markers"""
         # Get marker centers
@@ -106,6 +114,12 @@ class GridFlowTracker:
         # Initialize grid vectors
         self.grid_vectors = np.zeros((7, 9, 2))
         
+    def reset_zero_depth(self):
+        """Reset the zero reference for depth map"""
+        self.dm_zero = np.zeros((self.imgh, self.imgw))
+        self.dm_zero_counter = 0
+        print("Zeroing depth map... Do not touch the gel!")
+
     def update(self, frame):
         """Update tracking with new frame"""
         if self.marker_tracker is None:
@@ -131,9 +145,38 @@ class GridFlowTracker:
         
         # Get depth map using neural network
         self.depth_map = self.nn.get_depthmap(frame, True, cm=None)
+
+        # Get contact area contour and mask for visualization and mouse control
+        contour, ellipse, final_mask = self.find_contact_area(self.depth_map)
+        # Store the mask needed for mouse control calculation
+        if contour is not None:
+             # Create a mask from the largest contour
+             self.last_contact_mask = final_mask
+        else:
+             self.last_contact_mask = None
         
- 
-                
+        # Update zero reference if still in calibration phase
+        if self.dm_zero_counter < 50:
+            self.dm_zero += self.depth_map
+            if self.dm_zero_counter == 49:
+                self.dm_zero /= 50
+                print("Depth map zeroing complete. Ready to use!")
+        self.dm_zero_counter += 1
+        
+        # Update mouse control if enabled
+        if self.mouse_control_enabled and self.last_contact_mask is not None:
+            avg_vector, avg_magnitude = self.mouse_controller.calculate_average_vector(
+                self.grid_vectors, self.last_contact_mask, self.grid_centers
+            )
+            self.mouse_controller.update_mouse(avg_vector, avg_magnitude)
+        elif self.mouse_control_enabled:
+            # Ensure mouse stops smoothly if contact is lost
+            self.mouse_controller.update_mouse(np.zeros(2), 0.0)
+            
+        # Store contour and ellipse for visualization
+        self.last_contour = contour
+        self.last_ellipse = ellipse
+
     def create_vector_heatmap(self):
         """Create a heatmap of the vector field"""
         # Create a grid for interpolation
@@ -188,30 +231,64 @@ class GridFlowTracker:
     def find_contact_area(self, depth_map):
         """Find contact area from depth map and fit ellipse"""
         # Threshold the depth map to find contact regions
-        # Use Otsu's method to find the threshold automatically
         depth_norm = cv2.normalize(depth_map, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-        _, contact_mask = cv2.threshold(depth_norm, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        # Apply slight blur before thresholding
+        depth_blur = cv2.GaussianBlur(depth_norm, (3, 3), 0)
+        
+        # Use Otsu's method (adjust if adaptive thresholding works better for you)
+        threshold_value, contact_mask_otsu = cv2.threshold(depth_blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        
+        # Optional: Adaptive Thresholding (alternative, uncomment to try)
+        # block_size = 15 # Must be odd
+        # C = -5 # Constant to subtract
+        # contact_mask_adaptive = cv2.adaptiveThreshold(depth_blur, 255, 
+        #                                     cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+        #                                     cv2.THRESH_BINARY, block_size, C)
+        # Use one of the masks
+        contact_mask = contact_mask_otsu # or contact_mask_adaptive
         
         # Clean up the mask with morphological operations
-        kernel = np.ones((2,2), np.uint8)
-        #contact_mask = cv2.morphologyEx(contact_mask, cv2.MORPH_CLOSE, kernel)
-        #contact_mask = cv2.morphologyEx(contact_mask, cv2.MORPH_OPEN, kernel)
+        kernel_close = np.ones((5,5), np.uint8) # Slightly larger for closing gaps
+        kernel_open = np.ones((3,3), np.uint8)  # Smaller for removing noise
+        contact_mask = cv2.morphologyEx(contact_mask, cv2.MORPH_CLOSE, kernel_close, iterations=1)
+        contact_mask = cv2.morphologyEx(contact_mask, cv2.MORPH_OPEN, kernel_open, iterations=1)
         
         # Find contours in the mask
         contours, _ = cv2.findContours(contact_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         if not contours:
-            return None, None
+            return None, None, None # Return None for mask too
             
-        # Find the largest contour
-        largest_contour = max(contours, key=cv2.contourArea)
+        # Filter contours by area (optional, adjust min_area as needed)
+        min_area = 50 # Example minimum area
+        valid_contours = [cnt for cnt in contours if cv2.contourArea(cnt) >= min_area]
+        
+        if not valid_contours:
+            return None, None, None
+            
+        # Find the largest valid contour
+        largest_contour = max(valid_contours, key=cv2.contourArea)
+        
+        # Create the final mask from the largest contour
+        final_mask = np.zeros_like(depth_map, dtype=np.uint8)
+        cv2.drawContours(final_mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
         
         # Fit an ellipse to the contour if it has enough points
+        ellipse = None
         if len(largest_contour) >= 5:
-            ellipse = cv2.fitEllipse(largest_contour)
-            return largest_contour, ellipse
+            try:
+                # Smooth contour slightly before fitting ellipse
+                epsilon = 0.005 * cv2.arcLength(largest_contour, True)
+                approx_contour = cv2.approxPolyDP(largest_contour, epsilon, True)
+                if len(approx_contour) >= 5:
+                    ellipse = cv2.fitEllipse(approx_contour)
+                else:
+                     ellipse = cv2.fitEllipse(largest_contour) # Fallback if approx fails
+            except cv2.error as e:
+                 print(f"Error fitting ellipse: {e}") # Handle potential OpenCV errors
+                 ellipse = None # Ensure ellipse is None if fitting fails
         
-        return largest_contour, None
+        return largest_contour, ellipse, final_mask # Return mask as well
         
     def visualize(self, frame):
         """Visualize tracking results with both vector field and depth map"""
@@ -238,11 +315,14 @@ class GridFlowTracker:
                         cv2.circle(vis_frame, (end_x,end_y), 3, (255,0,0), -1)
 
         # Create depth map visualization
-        depth_vis = cv2.normalize(self.depth_map, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-        depth_vis_bgr = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
-        
-        # Find and draw contact area on depth map
-        contour, ellipse = self.find_contact_area(self.depth_map)
+        depth_display = cv2.normalize(self.depth_map, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        depth_vis_bgr = cv2.cvtColor(depth_display, cv2.COLOR_GRAY2BGR)
+
+        # Get the latest contour and ellipse calculated in update()
+        contour = self.last_contour
+        ellipse = self.last_ellipse
+
+        # Draw contact area on depth map if found
         if contour is not None:
             # Draw the contour in green
             cv2.drawContours(depth_vis_bgr, [contour], -1, (0,255,0), 2)
@@ -284,10 +364,25 @@ class GridFlowTracker:
                 cv2.putText(depth_vis_bgr, f'Area: {area_mm2:.1f}mm2', 
                           (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
         
+        # Add mouse control status text to depth visualization
+        mc_status = "ON" if self.mouse_control_enabled else "OFF"
+        cv2.putText(depth_vis_bgr, f'Mouse: {mc_status} (m)', (10, depth_vis_bgr.shape[0] - 10), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 255), 2)
+
         # Update 3D visualization
         self.vis3d.update(self.depth_map)
         
         return vis_frame, depth_vis_bgr
+
+    def toggle_mouse_control(self):
+        """Toggle mouse control on/off"""
+        self.mouse_control_enabled = not self.mouse_control_enabled
+        status = "enabled" if self.mouse_control_enabled else "disabled"
+        print(f"Mouse control {status}")
+        if not self.mouse_control_enabled:
+            # Reset smoothed velocity when disabling to prevent drift
+            self.mouse_controller.smoothed_dx = 0.0
+            self.mouse_controller.smoothed_dy = 0.0
 
 def main():
     # Initialize parameters
@@ -346,9 +441,16 @@ def main():
             if key == ord('q'):
                 break
             elif key == ord('r'):
-                # Reset base frame
-                tracker.initialize(frame)
-                
+                # Reset base frame only (not depth zero)
+                print("Resetting reference frame...")
+                tracker.initialize(frame) 
+            elif key == ord(' '):  # Spacebar
+                print("Resetting reference frame AND zeroing depth...")
+                tracker.initialize(frame)  # Resets frame and starts depth zeroing
+                #tracker.reset_zero_depth() # initialize already resets depth zero
+            elif key == ord('m'): # Toggle mouse control
+                 tracker.toggle_mouse_control()
+                 
     except KeyboardInterrupt:
         print('Interrupted!')
     finally:
