@@ -1,0 +1,15 @@
+{
+    "default_camera_index": 1,
+    "camera_width": 320,
+    "camera_height": 240,
+    "border_fraction": 0.15,
+    "marker_mask_min": 0,
+    "marker_mask_max": 70,
+    "pointcloud_enabled": true,
+    "pointcloud_window_scale": 3.0,
+    "cv_image_stack_scale": 1.5,
+    "nn_model_path": "./models/nnmini.pt",
+    "cmap_txt_path": "./cmap.txt",
+    "cmap_in_BGR_format": true,
+    "use_gpu": false
+}
