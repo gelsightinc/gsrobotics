@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 import os
 import cv2
-from utilities.poisson_solver import poisson_dct_neumaan
+from utilities.poisson_solver import poisson_dct_neumann
 from utilities.image_processing import mask_from_range, remove_masked_area
 from utilities.logger import log_message
 from typing import Optional
@@ -176,7 +176,7 @@ class Reconstruction3D:
             )
 
         # Reconstruct depth from gradients using Poisson integration.
-        depth_map = poisson_dct_neumaan(gx=gradient_x, gy=gradient_y)
+        depth_map = poisson_dct_neumann(gx=gradient_x, gy=gradient_y)
         depth_map = np.reshape(depth_map, (image_height, image_width))
 
         # Update zero depth map for the first 50 frames.
