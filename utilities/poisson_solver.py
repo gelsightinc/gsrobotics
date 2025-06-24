@@ -3,7 +3,7 @@ from scipy import fftpack
 import math
 
 
-def poisson_dct_neumaan(gx: np.ndarray, gy: np.ndarray) -> np.ndarray:
+def poisson_dct_neumann(gx: np.ndarray, gy: np.ndarray) -> np.ndarray:
     """
     Perform 2D integration using a Poisson solver with non-homogeneous
     Neuman boundary conditions.
