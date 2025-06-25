@@ -69,9 +69,7 @@ class TopBar(BoxLayout):
                 color=(1, 1, 1, 1),
             )
         )
-        from utilities.gelsightmini import (
-            Camera,
-        )  # import here to avoid circular dependency if needed
+        from utilities.gelsightmini import Camera
 
         available_devices = Camera.list_devices()
         spinner_values = [f"Device {k}" for k in sorted(available_devices.keys())]
@@ -97,3 +95,83 @@ class TopBar(BoxLayout):
         app = App.get_running_app()
         app.show_overlay("Connecting...")
         threading.Thread(target=callback, args=(device_index,), daemon=True).start()
+
+
+# --- Dual Camera Top Bar ---
+class DualTopBar(BoxLayout):
+    def __init__(self, on_device_selected_callback, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = "horizontal"
+        self.size_hint_y = None
+        self.height = dp(50)
+        self.padding = [dp(10)] * 4
+
+        from utilities.gelsightmini import Camera
+
+        available_devices = Camera.list_devices()
+        spinner_values = [f"Device {k}" for k in sorted(available_devices.keys())]
+
+        left = BoxLayout(orientation="horizontal")
+        left.add_widget(
+            Label(
+                text="Camera 1:",
+                size_hint=(None, 1),
+                width=dp(80),
+                color=(1, 1, 1, 1),
+            )
+        )
+        self.device_spinner1 = Spinner(
+            text="Select Device",
+            values=spinner_values,
+            size_hint=(None, 1),
+            width=dp(120),
+        )
+        self.device_spinner1.bind(
+            text=lambda spinner, text: self.check_and_trigger(
+                on_device_selected_callback
+            )
+        )
+        left.add_widget(self.device_spinner1)
+
+        left.add_widget(
+            Label(
+                text="Camera 2:",
+                size_hint=(None, 1),
+                width=dp(80),
+                color=(1, 1, 1, 1),
+            )
+        )
+        self.device_spinner2 = Spinner(
+            text="Select Device",
+            values=spinner_values,
+            size_hint=(None, 1),
+            width=dp(120),
+        )
+        self.device_spinner2.bind(
+            text=lambda spinner, text: self.check_and_trigger(
+                on_device_selected_callback
+            )
+        )
+        left.add_widget(self.device_spinner2)
+        self.add_widget(left)
+
+    def check_and_trigger(self, callback):
+        try:
+            idx1 = int(self.device_spinner1.text.split()[-1])
+        except Exception:
+            idx1 = None
+        try:
+            idx2 = int(self.device_spinner2.text.split()[-1])
+        except Exception:
+            idx2 = None
+        # Only trigger if both are selected, not the same, and not default
+        if (
+            idx1 is not None
+            and idx2 is not None
+            and idx1 != idx2
+            and self.device_spinner1.text != "Select Device"
+            and self.device_spinner2.text != "Select Device"
+        ):
+            app = App.get_running_app()
+            app.show_overlay("Connecting...")
+            threading.Thread(target=callback, args=((idx1, idx2),), daemon=True).start()

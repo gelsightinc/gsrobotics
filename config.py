@@ -9,6 +9,8 @@ class ConfigModel(BaseModel):
     default_camera_index: int
     camera_width: int
     camera_height: int
+    second_camera_width: int
+    second_camera_height: int
     border_fraction: float
     marker_mask_min: int
     marker_mask_max: int
@@ -25,6 +27,8 @@ default_config = ConfigModel(
     default_camera_index=0,
     camera_width=320,
     camera_height=240,
+    second_camera_width=320,
+    second_camera_height=240,
     border_fraction=0.15,
     marker_mask_min=0,
     marker_mask_max=70,

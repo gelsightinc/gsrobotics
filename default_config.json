@@ -2,6 +2,8 @@
     "default_camera_index": 1,
     "camera_width": 320,
     "camera_height": 240,
+    "second_camera_width": 640,
+    "second_camera_height": 480,
     "border_fraction": 0.15,
     "marker_mask_min": 0,
     "marker_mask_max": 70,
