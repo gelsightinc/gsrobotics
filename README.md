@@ -5,6 +5,7 @@ This respository contains python code to connect to the GelSight Mini hardware. 
 On this page, you will find
  - [Demo Scripts](#demo-scripts) for
    + [Live View](#liveview-demo)
+   + [Live View Dual](#liveview-dual-demo)
    + [Marker tracking](#marker-tracker-demo)
    + [3D Viewer](#3d-viewer-demo)
    + [Basic OpenCV Demo](#basic-opencv-demo)
@@ -58,6 +59,10 @@ The default location is the Desktop.
 
 1. Select **Start Recording** button to start feed capture. Then pres **Stop Recording** to save
    captured feed at **Data Folder** location as .mp4 file.
+   
+## Liveview Dual Demo
+
+1. Run `demo_liveview_dual.py` in PyCharm. This script is similar to `demo_liveview.py`, but it lets you view two camera feeds simultaneously. A windowed application for the live-view session will open. On the top bar you’ll find two device-selection drop-downs; use them to choose your cameras. This dual-selection interface is especially helpful when you have multiple camera devices connected. After selecting both devices, the live feeds should start automatically.
 
 ## Marker Tracker Demo
 
